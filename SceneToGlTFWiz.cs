@@ -142,6 +142,16 @@ public class SceneToGlTFWiz : EditorWindow
 		Debug.Log ("attempting to save to "+path);
 		writer.OpenFiles (path);
 
+		if (rtcScript != null && root != null)
+		{
+			var instance = Activator.CreateInstance(rtcScript.GetClass());
+			var rtc = instance as RTCCallback;
+			if (rtc != null)
+			{
+				writer.RTCCenter = rtc.GetCenter(root);
+			}
+		}
+
 		// first, collect objects in the scene, add to lists
 		foreach (Transform tr in trs)
 		{
@@ -380,7 +390,7 @@ public class SceneToGlTFWiz : EditorWindow
 									tech.attributes.Add(tAttr);
 								}
 
-								tech.AddDefaultUniforms();
+								tech.AddDefaultUniforms(writer.RTCCenter != null);
 
 								GlTF_Writer.techniques.Add (techName, tech);
 
@@ -687,18 +697,7 @@ public class SceneToGlTFWiz : EditorWindow
 				node.childrenNames.Add (GlTF_Node.GetNameFromObject(t));
 
 			GlTF_Writer.nodes.Add (node);
-		}				
-			
-
-		if (rtcScript != null && root != null)
-		{
-			var instance = Activator.CreateInstance(rtcScript.GetClass());
-			var rtc = instance as RTCCallback;
-			if (rtc != null)
-			{
-				writer.RTCCenter = rtc.GetCenter(root);
-			}
-		}
+		}							
 
 		// third, add meshes etc to byte stream, keeping track of buffer offsets
 		writer.Write ();

@@ -23,7 +23,8 @@ public class GlTF_Technique : GlTF_Writer {
 		TEXCOORD_3,
 		MODELVIEW,
 		PROJECTION,
-		MODELVIEWINVERSETRANSPOSE
+		MODELVIEWINVERSETRANSPOSE,
+		CESIUM_RTC_MODELVIEW
 	}
 
 	public class Parameter {	
@@ -183,12 +184,12 @@ public class GlTF_Technique : GlTF_Writer {
 		return "technique_" + GlTF_Writer.GetNameFromObject(o);
 	}
 
-	public void AddDefaultUniforms()
+	public void AddDefaultUniforms(bool rtc)
 	{
 		var tParam = new Parameter();
 		tParam.name = "modelViewMatrix";
 		tParam.type = Type.FLOAT_MAT4;
-		tParam.semantic = Semantic.MODELVIEW;
+		tParam.semantic = rtc ? Semantic.CESIUM_RTC_MODELVIEW : Semantic.MODELVIEW;
 		parameters.Add(tParam);
 		var uni = new Uniform();
 		uni.name = "u_modelViewMatrix";
