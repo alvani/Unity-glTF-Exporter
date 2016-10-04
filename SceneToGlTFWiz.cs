@@ -66,12 +66,23 @@ public class SceneToGlTFWiz : EditorWindow
 			Debug.Log("obj "+o.name+"  "+o.GetType());
 		}
 */		
-		var ext = GlTF_Writer.binary ? "glb" : "gltf";
+		var ext = GlTF_Writer.binary ? (GlTF_Writer.b3dm ? "b3dm" : "glb") : "gltf";
 		path = EditorUtility.SaveFilePanel("Save glTF file as", savedPath, savedFile, ext);
 		if (path.Length != 0)
 		{	
 			Transform[] trs = Selection.GetTransforms (SelectionMode.Deep);
-			var root = (trs != null && trs.Length > 0) ? trs[0] : null;
+
+			Transform root = null;
+			// find root, the one with no parent
+			for (var i = 0; i < trs.Length; ++i)
+			{
+				if (trs[i].parent == null) 
+				{
+					root = trs[i];
+					break;
+				}
+			}
+
 			Export(path, trs, root);
 		}
 	}
@@ -80,6 +91,14 @@ public class SceneToGlTFWiz : EditorWindow
 	{
 		GUILayout.Label("Export Options");
 		GlTF_Writer.binary = GUILayout.Toggle(GlTF_Writer.binary, "Binary GlTF");
+		if (GlTF_Writer.binary)
+		{
+			GlTF_Writer.b3dm = GUILayout.Toggle(GlTF_Writer.b3dm, "B3dm");
+		}
+		else
+		{
+			GlTF_Writer.b3dm = false;
+		}
 		presetAsset = EditorGUILayout.ObjectField("Preset file", presetAsset, typeof(UnityEngine.TextAsset), false) as UnityEngine.TextAsset;	
 		rtcScript = EditorGUILayout.ObjectField("Cesium RTC Callback", rtcScript, typeof(MonoScript), false) as MonoScript;
 

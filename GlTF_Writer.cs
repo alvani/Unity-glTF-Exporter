@@ -11,6 +11,7 @@ public class GlTF_Writer {
 	public static int indent = 0;
 	public static string binFileName;
 	public static bool binary;
+	public static bool b3dm;
 	static bool[] firsts = new bool[100];
 	public static GlTF_BufferView ushortBufferView = new GlTF_BufferView("ushortBufferView", 34963);
 	public static GlTF_BufferView floatBufferView = new GlTF_BufferView("floatBufferView");
@@ -107,7 +108,9 @@ public class GlTF_Writer {
 		{
 			binWriter = new BinaryWriter(fs);
 			binFile = fs;
-			fs.Seek(20, SeekOrigin.Begin); // header skip
+
+			long offset = 20 + (b3dm ? 20 : 0);
+			fs.Seek(offset, SeekOrigin.Begin); // header skip
 		} 
 		else 
 		{
@@ -636,7 +639,8 @@ public class GlTF_Writer {
 			jsonWriter.Flush();
 
 			// current pos - header size
-			contentLength = (uint)(fs.Position - 20);
+			int offset = 20 + (b3dm ? 20 : 0);
+			contentLength = (uint)(fs.Position - offset);
 		}
 			
 
@@ -654,10 +658,24 @@ public class GlTF_Writer {
 
 			// write header
 			fs.Seek(0, SeekOrigin.Begin);
+
+			if (b3dm) 
+			{
+				jsonWriter.Write("b3dm");	// magic
+				jsonWriter.Flush();
+				binWriter.Write(1);	// version
+				binWriter.Write(fileLength);
+				binWriter.Write(0);	// batchTableJSONByteLength
+//				binWriter.Write(0); // batchTableBinaryByteLength
+				binWriter.Write(0); // batchLength
+				binWriter.Flush();
+			}
+
 			jsonWriter.Write("glTF");	// magic
 			jsonWriter.Flush();
 			binWriter.Write(1);	// version
-			binWriter.Write(fileLength);
+			uint l = (uint)(fileLength - (b3dm ? 20 : 0)); // min b3dm header
+			binWriter.Write(l);
 			binWriter.Write(contentLength);
 			binWriter.Write(0);	// format
 			binWriter.Flush();
