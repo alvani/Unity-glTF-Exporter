@@ -37,12 +37,12 @@ public class SceneToGlTFWiz : EditorWindow
 	{
 		double[] GetCenter(Transform transform);
 	}
-	public interface B3DMCallback
+	public interface RotationCallback
 	{
 		Matrix4x4 GetRotationMatrix(Transform transform);		 
 	}
 	static MonoScript rtcScript;
-	static MonoScript b3dmScript;
+	static MonoScript rotScript;
 
 	[MenuItem ("File/Export/glTF")]
 	static void CreateWizard()
@@ -106,23 +106,25 @@ public class SceneToGlTFWiz : EditorWindow
 		}
 		presetAsset = EditorGUILayout.ObjectField("Preset file", presetAsset, typeof(UnityEngine.TextAsset), false) as UnityEngine.TextAsset;	
 		rtcScript = EditorGUILayout.ObjectField("Cesium RTC Callback", rtcScript, typeof(MonoScript), false) as MonoScript;
-		b3dmScript = EditorGUILayout.ObjectField("B3DM Callback", b3dmScript, typeof(MonoScript), false) as MonoScript;
+		rotScript = EditorGUILayout.ObjectField("Rotation Callback", rotScript, typeof(MonoScript), false) as MonoScript;
 
 		if (rtcScript != null)
 		{			
-			var ci = rtcScript.GetClass().GetInterface("SceneToGlTFWiz+RTCCallback");
+			var name = typeof(RTCCallback).FullName;
+			var ci = rtcScript.GetClass().GetInterface(name);
 			if (ci == null)
 			{
 				rtcScript = null;
 			}
 		}
 
-		if (b3dmScript != null) 
+		if (rotScript != null) 
 		{
-			var ci = b3dmScript.GetClass().GetInterface("SceneToGlTFWiz+B3DMCallback");
+			var name = typeof(RotationCallback).FullName;
+			var ci = rotScript.GetClass().GetInterface(name);
 			if (ci == null)
 			{
-				b3dmScript = null;
+				rotScript = null;
 			}
 		}
 
@@ -684,10 +686,10 @@ public class SceneToGlTFWiz : EditorWindow
 				mat.m22 = -1; // flip z axis
 
 				Matrix4x4 rotMat = Matrix4x4.identity;
-				if (b3dmScript != null && root != null)
+				if (rotScript != null && root != null)
 				{
-					var instance = Activator.CreateInstance(b3dmScript.GetClass());
-					var b3c = instance as B3DMCallback;
+					var instance = Activator.CreateInstance(rotScript.GetClass());
+					var b3c = instance as RotationCallback;
 					if (b3c != null)
 					{							
 						mat = b3c.GetRotationMatrix(root);
