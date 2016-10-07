@@ -37,7 +37,12 @@ public class SceneToGlTFWiz : EditorWindow
 	{
 		double[] GetCenter(Transform transform);
 	}
+	public interface B3DMCallback
+	{
+		Matrix4x4 GetRotationMatrix(Transform transform);		 
+	}
 	static MonoScript rtcScript;
+	static MonoScript b3dmScript;
 
 	[MenuItem ("File/Export/glTF")]
 	static void CreateWizard()
@@ -101,6 +106,7 @@ public class SceneToGlTFWiz : EditorWindow
 		}
 		presetAsset = EditorGUILayout.ObjectField("Preset file", presetAsset, typeof(UnityEngine.TextAsset), false) as UnityEngine.TextAsset;	
 		rtcScript = EditorGUILayout.ObjectField("Cesium RTC Callback", rtcScript, typeof(MonoScript), false) as MonoScript;
+		b3dmScript = EditorGUILayout.ObjectField("B3DM Callback", b3dmScript, typeof(MonoScript), false) as MonoScript;
 
 		if (rtcScript != null)
 		{			
@@ -108,6 +114,15 @@ public class SceneToGlTFWiz : EditorWindow
 			if (ci == null)
 			{
 				rtcScript = null;
+			}
+		}
+
+		if (b3dmScript != null) 
+		{
+			var ci = b3dmScript.GetClass().GetInterface("SceneToGlTFWiz+B3DMCallback");
+			if (ci == null)
+			{
+				b3dmScript = null;
 			}
 		}
 
