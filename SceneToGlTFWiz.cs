@@ -682,6 +682,18 @@ public class SceneToGlTFWiz : EditorWindow
 			{
 				Matrix4x4 mat = Matrix4x4.identity;
 				mat.m22 = -1; // flip z axis
+
+				Matrix4x4 rotMat = Matrix4x4.identity;
+				if (b3dmScript != null && root != null)
+				{
+					var instance = Activator.CreateInstance(b3dmScript.GetClass());
+					var b3c = instance as B3DMCallback;
+					if (b3c != null)
+					{							
+						mat = b3c.GetRotationMatrix(root);
+					}
+				}
+
 				mat = mat * Matrix4x4.TRS(tr.localPosition, tr.localRotation, tr.localScale);
 				node.matrix = new GlTF_Matrix(mat);
 			} 
