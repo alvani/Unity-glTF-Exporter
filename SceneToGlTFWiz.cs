@@ -134,7 +134,7 @@ public class SceneToGlTFWiz : EditorWindow
 		}
 	}
 
-	static void Export(string path, Transform[] trs, Transform root)
+	static BoundsDouble Export(string path, Transform[] trs, Transform root)
 	{
 		writer = new GlTF_Writer();
 		writer.Init ();
@@ -169,9 +169,13 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 		}
 
+		BoundsDouble bb = new BoundsDouble();
+
 		// first, collect objects in the scene, add to lists
 		foreach (Transform tr in trs)
 		{
+			BoundsDouble tbb = new BoundsDouble();
+
 			if (tr.GetComponent<Camera>() != null)
 			{
 				if (tr.GetComponent<Camera>().orthographic)
@@ -658,6 +662,11 @@ public class SceneToGlTFWiz : EditorWindow
 				//						}
 				//					}
 
+
+				Vector4 maxf = positionAccessor.maxFloat;
+				Vector4 minf = positionAccessor.minFloat;
+
+				tbb.Encapsulate(new BoundsDouble(new Vector3(minf.x, minf.y, minf.z), new Vector3(maxf.x, maxf.y, maxf.z)));
 			}
 
 			Animation a = tr.GetComponent<Animation>();
@@ -680,20 +689,25 @@ public class SceneToGlTFWiz : EditorWindow
 			// next, build hierarchy of nodes
 			GlTF_Node node = new GlTF_Node();
 
+			Matrix4x4 rotMat = Matrix4x4.identity;
+			if (rotScript != null && root != null)
+			{
+				var instance = Activator.CreateInstance(rotScript.GetClass());
+				var b3c = instance as RotationCallback;
+				if (b3c != null)
+				{							
+					rotMat = b3c.GetRotationMatrix(root);
+				}
+			}
+
 			if (tr.parent == null)
 			{
 				Matrix4x4 mat = Matrix4x4.identity;
 				mat.m22 = -1; // flip z axis
 
-				Matrix4x4 rotMat = Matrix4x4.identity;
-				if (rotScript != null && root != null)
+				if (rotMat != Matrix4x4.identity) 
 				{
-					var instance = Activator.CreateInstance(rotScript.GetClass());
-					var b3c = instance as RotationCallback;
-					if (b3c != null)
-					{							
-						mat = b3c.GetRotationMatrix(root);
-					}
+					mat = rotMat;
 				}
 
 				mat = mat * Matrix4x4.TRS(tr.localPosition, tr.localRotation, tr.localScale);
@@ -726,11 +740,29 @@ public class SceneToGlTFWiz : EditorWindow
 				node.childrenNames.Add (GlTF_Node.GetNameFromObject(t));
 
 			GlTF_Writer.nodes.Add (node);
-		}							
 
+			// calculate bounding box transform
+			if (!tbb.Empty && root != null) 
+			{		
+				var pos = tr.position - root.position; // relative to parent
+				var mbb = rotMat * Matrix4x4.TRS(pos, tr.rotation, tr.lossyScale);
+
+				tbb.Rotate(mbb);
+
+				if (writer.RTCCenter != null) 
+				{
+					var c = writer.RTCCenter;
+					tbb.Translate(c[0], c[1], c[2]);
+				}
+
+				bb.Encapsulate(tbb);
+			}
+		}				
+			
 		// third, add meshes etc to byte stream, keeping track of buffer offsets
 		writer.Write ();
 		writer.CloseFiles();
+		return bb;
 	}
 	
 	static string toGlTFname(string name)
