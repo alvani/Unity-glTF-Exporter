@@ -80,4 +80,16 @@ public class BoundsDouble {
 		}
 	}
 
+	public double[] Min {
+		get {
+			return min;
+		}
+	}
+
+	public double[] Max {
+		get {
+			return max;
+		}
+	}
+
 }
