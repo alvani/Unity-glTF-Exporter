@@ -21,10 +21,10 @@ public class GlTF_Accessor : GlTF_Writer {
 	public int count;//": 2399,
 	public Type type = Type.SCALAR;
 
-	Vector4 maxFloat;
-	Vector4 minFloat;
-	int minInt;
-	int maxInt;
+	public Vector4 maxFloat;
+	public Vector4 minFloat;
+	public int minInt;
+	public int maxInt;
 
 	public GlTF_Accessor (string n) { name = n; }
 	public GlTF_Accessor (string n, Type t, ComponentType c) {
