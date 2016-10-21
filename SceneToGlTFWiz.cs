@@ -31,7 +31,7 @@ public class SceneToGlTFWiz : EditorWindow
 	static string savedFile = EditorPrefs.GetString (KEY_FILE, "test.gltf");
 
 	static Preset preset = new Preset();
-	static UnityEngine.TextAsset presetAsset;
+	public static UnityEngine.TextAsset presetAsset;
 
 	public interface RTCCallback
 	{
@@ -41,8 +41,8 @@ public class SceneToGlTFWiz : EditorWindow
 	{
 		Matrix4x4 GetRotationMatrix(Transform transform);		 
 	}
-	static MonoScript rtcScript;
-	static MonoScript rotScript;
+	public static MonoScript rtcScript;
+	public static MonoScript rotScript;
 
 	[MenuItem ("File/Export/glTF")]
 	static void CreateWizard()
@@ -134,7 +134,7 @@ public class SceneToGlTFWiz : EditorWindow
 		}
 	}
 
-	static BoundsDouble Export(string path, Transform[] trs, Transform root)
+	public static BoundsDouble Export(string path, Transform[] trs, Transform root)
 	{
 		writer = new GlTF_Writer();
 		writer.Init ();
