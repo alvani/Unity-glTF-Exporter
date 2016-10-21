@@ -980,21 +980,25 @@ namespace SimpleJSON
 		public JSONData (float aData)
 		{
 			AsFloat = aData;
+			Tag = JSONBinaryTag.FloatValue;
 		}
 
 		public JSONData (double aData)
 		{
 			AsDouble = aData;
+			Tag = JSONBinaryTag.DoubleValue;
 		}
 
 		public JSONData (bool aData)
 		{
 			AsBool = aData;
+			Tag = JSONBinaryTag.BoolValue;
 		}
 
 		public JSONData (int aData)
 		{
 			AsInt = aData;
+			Tag = JSONBinaryTag.IntValue;
 		}
 
 		public override string ToString ()
@@ -1013,6 +1017,7 @@ namespace SimpleJSON
 			case JSONBinaryTag.DoubleValue:
 			case JSONBinaryTag.FloatValue:
 			case JSONBinaryTag.IntValue:
+			case JSONBinaryTag.BoolValue:
 				return m_Data;
 			case JSONBinaryTag.Value:
 				return string.Format ("\"{0}\"", Escape (m_Data));
