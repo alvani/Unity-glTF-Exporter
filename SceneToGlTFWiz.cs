@@ -39,7 +39,8 @@ public class SceneToGlTFWiz : EditorWindow
 	}
 	public interface RotationCallback
 	{
-		Matrix4x4 GetRotationMatrix(Transform transform);		 
+		Matrix4x4 GetBoundsRotationMatrix(Transform transform);
+		Matrix4x4 GetNodeRotationMatrix(Transform transform);
 	}
 	public static MonoScript rtcScript;
 	public static MonoScript rotScript;
@@ -136,6 +137,15 @@ public class SceneToGlTFWiz : EditorWindow
 
 	public static BoundsDouble Export(string path, Transform[] trs, Transform root)
 	{
+		double minHeight = 0, maxHeight = 0;
+		return Export(path, trs, root, out minHeight, out maxHeight);
+	}
+
+	public static BoundsDouble Export(string path, Transform[] trs, Transform root, out double minHeight, out double maxHeight)
+	{
+		minHeight = 0; 
+		maxHeight = 0;
+
 		writer = new GlTF_Writer();
 		writer.Init ();
 				 
@@ -689,14 +699,14 @@ public class SceneToGlTFWiz : EditorWindow
 			// next, build hierarchy of nodes
 			GlTF_Node node = new GlTF_Node();
 
+			var instance = Activator.CreateInstance(rotScript.GetClass());
+			var b3c = instance as RotationCallback;
 			Matrix4x4 rotMat = Matrix4x4.identity;
 			if (rotScript != null && root != null)
-			{
-				var instance = Activator.CreateInstance(rotScript.GetClass());
-				var b3c = instance as RotationCallback;
+			{				
 				if (b3c != null)
 				{							
-					rotMat = b3c.GetRotationMatrix(root);
+					rotMat = b3c.GetNodeRotationMatrix(root);
 				}
 			}
 
@@ -744,8 +754,21 @@ public class SceneToGlTFWiz : EditorWindow
 			// calculate bounding box transform
 			if (!tbb.Empty && root != null) 
 			{		
+				Matrix4x4 brot = Matrix4x4.identity;
+				if (b3c != null)
+				{							
+					brot = b3c.GetBoundsRotationMatrix(root);
+				}
+
 				var pos = tr.position - root.position; // relative to parent
-				var mbb = rotMat * Matrix4x4.TRS(pos, tr.rotation, tr.lossyScale);
+				var objMat = Matrix4x4.TRS(pos, tr.rotation, tr.lossyScale);
+				var mbb = brot * objMat;
+
+				// calculate local height
+				var obb = new BoundsDouble(tbb);
+				obb.Rotate(objMat);
+				minHeight = obb.Min[1];
+				maxHeight = obb.Max[1];
 
 				tbb.Rotate(mbb);
 
