@@ -656,7 +656,6 @@ public class GlTF_Writer {
 		if (binary)
 		{
 			uint fileLength = (uint)fs.Length;
-			Debug.Log("fl: " + fileLength);
 
 			// write header
 			fs.Seek(0, SeekOrigin.Begin);
