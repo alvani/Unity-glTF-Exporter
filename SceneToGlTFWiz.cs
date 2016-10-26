@@ -846,8 +846,10 @@ public class SceneToGlTFWiz : EditorWindow
 		var t = texture as Texture2D;
 		if (t != null)
 		{
-			if (t.format != TextureFormat.RGBA32)
-			{								
+			var ext = Path.GetExtension(assetPath);
+			if (ext != ".png")
+			{									
+//				Imaging.DDSReader.DDS.LoadImage(, true);
 				fn = Path.GetFileNameWithoutExtension(assetPath) + ".png";
 				var dstPath = Path.Combine(path, fn);
 				Texture2D t2 = new Texture2D(t.width, t.height, TextureFormat.RGBA32, false);
@@ -859,7 +861,7 @@ public class SceneToGlTFWiz : EditorWindow
 			else
 			{
 				var dstPath = Path.Combine(path, fn);
-				File.Copy(assetPath, dstPath);
+				File.Copy(assetPath, dstPath, true);
 			}
 		}
 		return fn;
