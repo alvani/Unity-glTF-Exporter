@@ -10,6 +10,14 @@ public class BoundsDouble {
 	public BoundsDouble() {
 	}
 
+	public BoundsDouble(BoundsDouble b) {
+		for (int i = 0; i < 3; ++i) {
+			min[i] = b.min[i];
+			max[i] = b.max[i];
+		}
+		inited = true;
+	}
+
 	public BoundsDouble(Vector3 min, Vector3 max) {
 		this.min[0] = min.x;
 		this.min[1] = min.y;
