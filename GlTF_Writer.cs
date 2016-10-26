@@ -33,6 +33,8 @@ public class GlTF_Writer {
 	public static List<GlTF_Program> programs = new List<GlTF_Program>();
 	public static List<GlTF_Shader> shaders = new List<GlTF_Shader>();
 
+	const int B3DM_HEADER_SIZE = 24;
+
 	public double[] RTCCenter;
 
 	static public string GetNameFromObject(Object o, bool useId = false) 
@@ -109,7 +111,7 @@ public class GlTF_Writer {
 			binWriter = new BinaryWriter(fs);
 			binFile = fs;
 
-			long offset = 20 + (b3dm ? 20 : 0);
+			long offset = 20 + (b3dm ? B3DM_HEADER_SIZE : 0);
 			fs.Seek(offset, SeekOrigin.Begin); // header skip
 		} 
 		else 
@@ -639,7 +641,7 @@ public class GlTF_Writer {
 			jsonWriter.Flush();
 
 			// current pos - header size
-			int offset = 20 + (b3dm ? 20 : 0);
+			int offset = 20 + (b3dm ? B3DM_HEADER_SIZE : 0);
 			contentLength = (uint)(fs.Position - offset);
 		}
 			
@@ -666,7 +668,7 @@ public class GlTF_Writer {
 				binWriter.Write(1);	// version
 				binWriter.Write(fileLength);
 				binWriter.Write(0);	// batchTableJSONByteLength
-//				binWriter.Write(0); // batchTableBinaryByteLength
+				binWriter.Write(0); // batchTableBinaryByteLength
 				binWriter.Write(0); // batchLength
 				binWriter.Flush();
 			}
@@ -674,7 +676,7 @@ public class GlTF_Writer {
 			jsonWriter.Write("glTF");	// magic
 			jsonWriter.Flush();
 			binWriter.Write(1);	// version
-			uint l = (uint)(fileLength - (b3dm ? 20 : 0)); // min b3dm header
+			uint l = (uint)(fileLength - (b3dm ? B3DM_HEADER_SIZE : 0)); // min b3dm header
 			binWriter.Write(l);
 			binWriter.Write(contentLength);
 			binWriter.Write(0);	// format
