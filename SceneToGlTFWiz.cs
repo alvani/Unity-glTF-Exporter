@@ -855,15 +855,28 @@ public class SceneToGlTFWiz : EditorWindow
 		{
 			var ext = Path.GetExtension(assetPath);
 			if (ext != ".png")
-			{									
-//				Imaging.DDSReader.DDS.LoadImage(, true);
-				fn = Path.GetFileNameWithoutExtension(assetPath) + ".png";
-				var dstPath = Path.Combine(path, fn);
-				Texture2D t2 = new Texture2D(t.width, t.height, TextureFormat.RGBA32, false);
-				t2.SetPixels(t.GetPixels());
-				t2.Apply();
-				var b = t2.EncodeToPNG();
-				File.WriteAllBytes(dstPath, b);
+			{				
+				var ct = Type.GetType("Imaging.DDSReader.DDS");
+				if (ct != null) 
+				{					
+					var srcPath = GetAssetFullPath(assetPath);
+//					var srcTex = Imaging.DDSReader.DDS.LoadImage(srcPath, true);
+					Texture2D srcTex = ct.GetMethod("LoadImage", new Type[] {typeof(string), typeof(bool)}).Invoke(null, new object[]{srcPath, true}) as Texture2D;
+					fn = Path.GetFileNameWithoutExtension(assetPath) + ".png";
+					var dstPath = Path.Combine(path, fn);
+					var b = srcTex.EncodeToPNG();
+					File.WriteAllBytes(dstPath, b);
+				}
+				else
+				{					
+					fn = Path.GetFileNameWithoutExtension(assetPath) + ".png";
+					var dstPath = Path.Combine(path, fn);
+					Texture2D t2 = new Texture2D(t.width, t.height, TextureFormat.RGBA32, false);
+					t2.SetPixels(t.GetPixels());
+					t2.Apply();
+					var b = t2.EncodeToPNG();
+					File.WriteAllBytes(dstPath, b);
+				}
 			}
 			else
 			{
@@ -872,5 +885,15 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 		}
 		return fn;
+	}
+
+	static string GetAssetFullPath(string path) 
+	{
+		if (path != null)
+		{
+			path = path.Remove(0, "Assets".Length);	
+			path = Application.dataPath + path;
+		}
+		return path;
 	}
 }
