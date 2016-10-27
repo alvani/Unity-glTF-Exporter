@@ -866,6 +866,7 @@ public class SceneToGlTFWiz : EditorWindow
 					var dstPath = Path.Combine(path, fn);
 					var b = srcTex.EncodeToPNG();
 					File.WriteAllBytes(dstPath, b);
+					Texture2D.DestroyImmediate(srcTex);
 				}
 				else
 				{					
@@ -876,6 +877,7 @@ public class SceneToGlTFWiz : EditorWindow
 					t2.Apply();
 					var b = t2.EncodeToPNG();
 					File.WriteAllBytes(dstPath, b);
+					Texture2D.DestroyImmediate(t2);
 				}
 			}
 			else
