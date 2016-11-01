@@ -179,6 +179,14 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 		}
 
+		// prepass, for texture unpacker
+		TextureUnpacker.Reset();
+		foreach (Transform tr in trs)
+		{
+			TextureUnpacker.CheckPackedTexture(tr);
+		}
+		TextureUnpacker.Build();
+
 		BoundsDouble bb = new BoundsDouble();
 
 		// first, collect objects in the scene, add to lists
@@ -593,6 +601,7 @@ public class SceneToGlTFWiz : EditorWindow
 
 				mesh.Populate (m);
 				GlTF_Writer.meshes.Add (mesh);
+				TextureUnpacker.ProcessMesh(mesh);
 
 
 
