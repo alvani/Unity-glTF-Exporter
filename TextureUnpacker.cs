@@ -112,10 +112,11 @@ public class TextureUnpacker {
 				var tris = m.GetTriangles(i);
 				for (int j = 0; j < tris.Length; ++j) {
 					Vector2 uv = uvs[tris[j]];
+					float y = 1.0f - uv.y; // flipped y
 					min.x = Mathf.Min(min.x, uv.x);
-					min.y = Mathf.Min(min.y, uv.y);
+					min.y = Mathf.Min(min.y, y);
 					max.x = Mathf.Max(max.x, uv.x);
-					max.y = Mathf.Max(max.y, uv.y);
+					max.y = Mathf.Max(max.y, y);
 				}
 
 				var dx = max.x - min.x;
@@ -218,7 +219,7 @@ public class TextureUnpacker {
 				// shift up
 				bottom = e.texHeight - 1;
 				top = bottom - (mh - 1);
-			}
+			}				
 
 			UVTransform uvt = new UVTransform();
 			uvt.offset = new Vector2(-(float)left / (float)e.texWidth, -(float)top / (float)e.texHeight);
@@ -238,19 +239,69 @@ public class TextureUnpacker {
 					uvtMap[subMeshIdx] = uvt;	
 				}
 			}				
-		}
-
-		//debug
-		foreach (var mesh in meshMap) {
-			Debug.Log("mesh: " + mesh.Key);
-			foreach (var uvt in mesh.Value) {
-				Debug.Log("idx: " + uvt.Key);
-			}
-		}
-
+		}			
 	}
 
-	public static void ProcessMesh(GlTF_Mesh mesh) {
-//		mesh.name;
+	public static void ProcessMesh(GlTF_Mesh mesh) {		
+		if (meshMap.ContainsKey(mesh.name)) {			
+			var uvtMap = meshMap[mesh.name];
+			HashSet<int> moddedIndex = new HashSet<int>(); // keep track modified uv
+			foreach (var i in uvtMap) {
+				var idx = i.Key;
+				var uvt = i.Value;
+
+				if (idx < mesh.primitives.Count) {
+					var prim = mesh.primitives[idx];
+					var ms = prim.indices.bufferView.memoryStream;
+					int offset = (int)prim.indices.byteOffset;
+					var len = prim.indices.count;
+					var buffer = new byte[len * 2];
+
+					// read indices
+					var pos = ms.Position;
+					ms.Position = offset;
+					ms.Read(buffer, 0, buffer.Length);
+
+					ushort[] indices = new ushort[len];
+					for (int j = 0; j < len; ++j) {
+						indices[j] = System.BitConverter.ToUInt16(buffer, j * 2);
+					}
+					ms.Position = pos;
+
+					//read uvs
+					ms = prim.attributes.texCoord0Accessor.bufferView.memoryStream;
+					offset = (int)prim.attributes.texCoord0Accessor.byteOffset;
+					len = prim.attributes.texCoord0Accessor.count;
+					buffer = new byte[len * 8];
+					pos = ms.Position;
+					ms.Position = offset;
+					ms.Read(buffer, 0, buffer.Length);
+
+					Vector2[] uvs = new Vector2[len];
+					for (int j = 0; j < len; ++j) {
+						var u = System.BitConverter.ToSingle(buffer, j * 8);
+						var v = System.BitConverter.ToSingle(buffer, j * 8 + 4);
+						uvs[j] = new Vector2(u, v);
+					}
+					ms.Position = pos;
+
+					// manipulate uvs
+					for (int j = 0; j < indices.Length; ++j) {						
+						var ind = indices[j];
+						if (!moddedIndex.Contains(ind)) {
+							var uv = uvs[ind];
+							uv += uvt.offset;
+							uv.Scale(uvt.scale);
+							uvs[indices[j]] = uv;
+							moddedIndex.Add(ind);
+						}
+					}
+
+					// write back
+					prim.attributes.texCoord0Accessor.Populate(uvs);
+				}
+
+			}
+		}
 	}
 }
