@@ -306,8 +306,7 @@ public class TextureUnpacker {
 	}
 
 	public static Texture2D ProcessTexture(string name, Texture2D tex) {		
-		if (entries.ContainsKey(name)) {
-			Debug.Log(name);
+		if (entries.ContainsKey(name)) {			
 			Entry e = entries[name];
 
 			var mw = e.right - e.left;
