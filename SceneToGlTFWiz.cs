@@ -860,6 +860,7 @@ public class SceneToGlTFWiz : EditorWindow
 		var assetPath = AssetDatabase.GetAssetPath(texture);
 		var fn = Path.GetFileName(assetPath);
 		var t = texture as Texture2D;
+		var name = GlTF_Texture.GetNameFromObject(t);
 		if (t != null)
 		{
 			var ext = Path.GetExtension(assetPath);
@@ -873,8 +874,12 @@ public class SceneToGlTFWiz : EditorWindow
 					Texture2D srcTex = ct.GetMethod("LoadImage", new Type[] {typeof(string), typeof(bool)}).Invoke(null, new object[]{srcPath, true}) as Texture2D;
 					fn = Path.GetFileNameWithoutExtension(assetPath) + ".png";
 					var dstPath = Path.Combine(path, fn);
-					var b = srcTex.EncodeToPNG();
+					var result = TextureUnpacker.ProcessTexture(name, srcTex);			
+					var b = result.EncodeToPNG();
 					File.WriteAllBytes(dstPath, b);
+					if (result != srcTex) {
+						Texture2D.DestroyImmediate(result);	
+					}
 					Texture2D.DestroyImmediate(srcTex);
 				}
 				else
@@ -884,15 +889,26 @@ public class SceneToGlTFWiz : EditorWindow
 					Texture2D t2 = new Texture2D(t.width, t.height, TextureFormat.RGBA32, false);
 					t2.SetPixels(t.GetPixels());
 					t2.Apply();
-					var b = t2.EncodeToPNG();
+					var result = TextureUnpacker.ProcessTexture(name, t2);
+					var b = result.EncodeToPNG();
 					File.WriteAllBytes(dstPath, b);
+					if (result != t2) {
+						Texture2D.DestroyImmediate(result);	
+					}
 					Texture2D.DestroyImmediate(t2);
 				}
 			}
 			else
 			{
 				var dstPath = Path.Combine(path, fn);
-				File.Copy(assetPath, dstPath, true);
+				var result = TextureUnpacker.ProcessTexture(name, t);
+				if (result != t) {
+					var b = result.EncodeToPNG();
+					File.WriteAllBytes(dstPath, b);
+					Texture2D.DestroyImmediate(result);
+				} else {					
+					File.Copy(assetPath, dstPath, true);
+				}
 			}
 		}
 		return fn;

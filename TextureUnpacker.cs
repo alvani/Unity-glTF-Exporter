@@ -304,4 +304,60 @@ public class TextureUnpacker {
 			}
 		}
 	}
+
+	public static Texture2D ProcessTexture(string name, Texture2D tex) {		
+		if (entries.ContainsKey(name)) {
+			Debug.Log(name);
+			Entry e = entries[name];
+
+			var mw = e.right - e.left;
+			var mh = e.bottom - e.top;
+
+			mw = Mathf.NextPowerOfTwo(mw);
+			mh = Mathf.NextPowerOfTwo(mh);
+
+			int left = e.left;
+			int right = left + (mw - 1);
+			if (right > e.texWidth - 1) {
+				// shift left
+				right = e.texWidth - 1;
+				left = right - (mw - 1);
+			}
+
+			int top = e.top;
+			int bottom = top + (mh - 1);
+			if (bottom > e.texHeight - 1) {
+				// shift up
+				bottom = e.texHeight - 1;
+				top = bottom - (mh - 1);
+			}
+
+			// flip top & bottom
+			var ftop = e.texHeight - 1 - top;
+			var fbottom = e.texHeight - 1 - bottom;
+			top = fbottom;
+			bottom = ftop;
+				
+			var src = tex.GetPixels32();
+			var dst = new Color32[mw * mh];
+
+
+			Debug.Log("left: " + left + " top: " + top + " right: " + right + " bottom: " + bottom);
+
+			for (int i = 0; i < mh; ++i) {
+				for (int j = 0; j < mw; ++j) {
+					var dstIdx = i * mw + j;
+					var srcIdx = (top + i) * tex.width + (left + j);
+					dst[dstIdx] = src[srcIdx];
+				}
+			}
+
+			Texture2D t = new Texture2D(mw, mh, TextureFormat.RGBA32, false);
+			t.SetPixels32(dst);
+			t.Apply();
+
+			return t;
+		}
+		return tex;	
+	}
 }
