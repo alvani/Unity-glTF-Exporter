@@ -341,9 +341,6 @@ public class TextureUnpacker {
 			var src = tex.GetPixels32();
 			var dst = new Color32[mw * mh];
 
-
-			Debug.Log("left: " + left + " top: " + top + " right: " + right + " bottom: " + bottom);
-
 			for (int i = 0; i < mh; ++i) {
 				for (int j = 0; j < mw; ++j) {
 					var dstIdx = i * mw + j;
