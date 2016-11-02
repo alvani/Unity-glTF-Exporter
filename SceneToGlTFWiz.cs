@@ -333,7 +333,6 @@ public class SceneToGlTFWiz : EditorWindow
 						{
 							GlTF_Material material = new GlTF_Material();	
 							material.name = matName;
-							material.diffuse = new GlTF_MaterialColor ("diffuse", mat.color);
 							GlTF_Writer.materials.Add (material.name, material);
 
 							//technique
