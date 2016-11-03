@@ -919,18 +919,21 @@ public class SceneToGlTFWiz : EditorWindow
 			else
 			{
 				var dstPath = Path.Combine(path, fn);
-
-				Texture2D curTex = null;
 				if (unpackTexture) {
-					curTex = TextureUnpacker.ProcessTexture(name, t);			
-				} else {
-					curTex = t;
-				}
+					// load src texture from path to prevent access error
+					var read = File.ReadAllBytes(assetPath);
+					Texture2D copyTex = new Texture2D(1, 1);
+					copyTex.LoadRawTextureData(read);
+					copyTex.Apply();
 
-				if (curTex != t) {
+					Texture2D curTex = TextureUnpacker.ProcessTexture(name, copyTex);
+
 					var b = curTex.EncodeToPNG();
 					File.WriteAllBytes(dstPath, b);
-					Texture2D.DestroyImmediate(curTex);
+					if (curTex != copyTex) {
+						Texture2D.DestroyImmediate(curTex);
+					}
+					Texture2D.DestroyImmediate(copyTex);
 				} else {					
 					File.Copy(assetPath, dstPath, true);
 				}
