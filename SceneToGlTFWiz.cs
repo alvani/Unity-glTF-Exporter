@@ -723,7 +723,7 @@ public class SceneToGlTFWiz : EditorWindow
 				}
 			}
 
-			if (tr.parent == null)
+			if (tr == root)
 			{
 				Matrix4x4 mat = Matrix4x4.identity;
 				mat.m22 = -1; // flip z axis
