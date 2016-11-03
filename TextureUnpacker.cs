@@ -122,67 +122,74 @@ public class TextureUnpacker {
 				var dx = max.x - min.x;
 				var dy = max.y - min.y;
 
-				if (r.sharedMaterials.Length > i && (dx < 0.9 || dy < 0.9)) {
+				if (r.sharedMaterials.Length > i) {
 					var mat = r.sharedMaterials[i];
 					var texs = GetTexturesFromMaterial(mat);
 					if (texs.Count > 0) {
 						var tex = texs[0];
-						var tw = tex.width;
-						var th = tex.height;
-
-						var sx = Mathf.FloorToInt(min.x * tw);
-						var fx = Mathf.CeilToInt(max.x * tw);
-						var sy = Mathf.FloorToInt(min.y * th);
-						var fy = Mathf.CeilToInt(max.y * th);
-						int wx = fx - sx;
-						int wy = fy - sy;
-
-						wx = Mathf.NextPowerOfTwo(wx);
-						wy = Mathf.NextPowerOfTwo(wy);
-
-						var meshName = GlTF_Mesh.GetNameFromObject(m);
 						var name = GlTF_Texture.GetNameFromObject(tex);
-						Entry e;
-						if (entries.ContainsKey(name)) {
-							e = entries[name];
+						if ((dx < 0.9 || dy < 0.9) || entries.ContainsKey(name)) {							
+							max.x = Mathf.Clamp01(max.x);
+							max.y = Mathf.Clamp01(max.y);
+							min.x = Mathf.Clamp01(min.x);
+							min.y = Mathf.Clamp01(min.y);
 
-							//merge
-							var minX = Mathf.Min(e.left, sx);
-							var maxX = Mathf.Max(e.right, fx);
-							var minY = Mathf.Min(e.top, sy);
-							var maxY = Mathf.Max(e.bottom, fy);
+							var tw = tex.width;
+							var th = tex.height;
 
-							var mw = maxX - minX;
-							var mh = maxY - minY;
+							var sx = Mathf.FloorToInt(min.x * tw);
+							var fx = Mathf.CeilToInt(max.x * tw);
+							var sy = Mathf.FloorToInt(min.y * th);
+							var fy = Mathf.CeilToInt(max.y * th);
+							int wx = fx - sx;
+							int wy = fy - sy;
 
-							mw = Mathf.NextPowerOfTwo(mw);
-							mh = Mathf.NextPowerOfTwo(mh);
+							wx = Mathf.NextPowerOfTwo(wx);
+							wy = Mathf.NextPowerOfTwo(wy);
 
-							e.left = minX;
-							e.right = maxX;
-							e.top = minY;
-							e.bottom = maxY;
-						} else {
-							e = new Entry();
-							e.left = sx;
-							e.right = fx;
-							e.top = sy;
-							e.bottom = fy;
-							e.texWidth = tex.width;
-							e.texHeight = tex.height;
-							entries[name] = e;
-						}	
+							var meshName = GlTF_Mesh.GetNameFromObject(m);
+							Entry e;
+							if (entries.ContainsKey(name)) {
+								e = entries[name];
 
-						List<int> subMeshId = null;
-						if (e.subMeshMap.ContainsKey(meshName)) {
-							subMeshId = e.subMeshMap[meshName];
-						} else {
-							subMeshId = new List<int>();
-							e.subMeshMap[meshName] = subMeshId;
-						}
+								//merge
+								var minX = Mathf.Min(e.left, sx);
+								var maxX = Mathf.Max(e.right, fx);
+								var minY = Mathf.Min(e.top, sy);
+								var maxY = Mathf.Max(e.bottom, fy);
 
-						if (!subMeshId.Contains(i)) {
-							subMeshId.Add(i);
+								var mw = maxX - minX;
+								var mh = maxY - minY;
+
+								mw = Mathf.NextPowerOfTwo(mw);
+								mh = Mathf.NextPowerOfTwo(mh);
+
+								e.left = minX;
+								e.right = maxX;
+								e.top = minY;
+								e.bottom = maxY;
+							} else {
+								e = new Entry();
+								e.left = sx;
+								e.right = fx;
+								e.top = sy;
+								e.bottom = fy;
+								e.texWidth = tex.width;
+								e.texHeight = tex.height;
+								entries[name] = e;
+							}	
+
+							List<int> subMeshId = null;
+							if (e.subMeshMap.ContainsKey(meshName)) {
+								subMeshId = e.subMeshMap[meshName];
+							} else {
+								subMeshId = new List<int>();
+								e.subMeshMap[meshName] = subMeshId;
+							}
+
+							if (!subMeshId.Contains(i)) {
+								subMeshId.Add(i);
+							}
 						}
 					}
 				}
