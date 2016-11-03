@@ -926,6 +926,11 @@ public class SceneToGlTFWiz : EditorWindow
 					copyTex.LoadImage(read);
 					copyTex.Apply();
 
+					// size could be different from import settings
+					if (t.width != copyTex.width || t.height != copyTex.height) {
+						TextureScale.Bilinear(copyTex, t.width, t.height);
+					}
+
 					Texture2D curTex = TextureUnpacker.ProcessTexture(name, copyTex);
 
 					var b = curTex.EncodeToPNG();
