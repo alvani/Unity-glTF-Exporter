@@ -922,8 +922,8 @@ public class SceneToGlTFWiz : EditorWindow
 				if (unpackTexture) {
 					// load src texture from path to prevent access error
 					var read = File.ReadAllBytes(assetPath);
-					Texture2D copyTex = new Texture2D(1, 1);
-					copyTex.LoadRawTextureData(read);
+					Texture2D copyTex = new Texture2D(t.width, t.height, TextureFormat.RGBA32, false);
+					copyTex.LoadImage(read);
 					copyTex.Apply();
 
 					Texture2D curTex = TextureUnpacker.ProcessTexture(name, copyTex);
