@@ -48,6 +48,14 @@ public class Preset {
 			Shader shader = new Shader();
 			shader.vertexShader = smc.Value["shaders"]["vertexShader"];
 			shader.fragmentShader = smc.Value["shaders"]["fragmentShader"];
+
+			if (shader.vertexShader == null) {
+				shader.vertexShader = DEFAULT_VERTEX_SHADER;
+			}
+			if (shader.fragmentShader == null) {
+				shader.fragmentShader = DEFAULT_FRAGMENT_SHADER;
+			}
+
 			shaderMap[smc.Key] = shader;
 		}
 			
