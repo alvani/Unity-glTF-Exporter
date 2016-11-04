@@ -89,11 +89,11 @@ public class GlTF_Sampler : GlTF_Writer {
 				magFilter = MagFilter.LINEAR;
 				if (hasMipMap)
 				{					
-					minFilter = MinFilter.LINEAR;
+					minFilter = MinFilter.LINEAR_MIPMAP_LINEAR;
 				}
 				else
 				{					
-					minFilter = MinFilter.LINEAR_MIPMAP_LINEAR;
+					minFilter = MinFilter.LINEAR;
 				}
 			}
 			break;
