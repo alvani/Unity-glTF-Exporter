@@ -185,7 +185,7 @@ public class SceneToGlTFWiz : EditorWindow
 			TextureUnpacker.Reset();
 			foreach (Transform tr in trs)
 			{
-				TextureUnpacker.CheckPackedTexture(tr);
+				TextureUnpacker.CheckPackedTexture(tr, preset);
 			}
 			TextureUnpacker.Build();
 		}
