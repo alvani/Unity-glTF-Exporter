@@ -161,69 +161,68 @@ public class TextureUnpacker {
 								var dy = dys[unpackUV.index];
 								var max = maxs[unpackUV.index];
 								var min = mins[unpackUV.index];
-								if ((dx < 0.9 || dy < 0.9) || entries.ContainsKey(name)) {									
-									max.x = Mathf.Clamp01(max.x);
-									max.y = Mathf.Clamp01(max.y);
-									min.x = Mathf.Clamp01(min.x);
-									min.y = Mathf.Clamp01(min.y);
 
-									var tw = tex.width;
-									var th = tex.height;
+								max.x = Mathf.Clamp01(max.x);
+								max.y = Mathf.Clamp01(max.y);
+								min.x = Mathf.Clamp01(min.x);
+								min.y = Mathf.Clamp01(min.y);
 
-									var sx = Mathf.FloorToInt(min.x * tw);
-									var fx = Mathf.CeilToInt(max.x * tw);
-									var sy = Mathf.FloorToInt(min.y * th);
-									var fy = Mathf.CeilToInt(max.y * th);
-									int wx = fx - sx;
-									int wy = fy - sy;
+								var tw = tex.width;
+								var th = tex.height;
 
-									wx = Mathf.NextPowerOfTwo(wx);
-									wy = Mathf.NextPowerOfTwo(wy);
+								var sx = Mathf.FloorToInt(min.x * tw);
+								var fx = Mathf.CeilToInt(max.x * tw);
+								var sy = Mathf.FloorToInt(min.y * th);
+								var fy = Mathf.CeilToInt(max.y * th);
+								int wx = fx - sx;
+								int wy = fy - sy;
 
-									var meshName = GlTF_Mesh.GetNameFromObject(m);
-									Entry e;
-									if (entries.ContainsKey(name)) {
-										e = entries[name];
+								wx = Mathf.NextPowerOfTwo(wx);
+								wy = Mathf.NextPowerOfTwo(wy);
 
-										//merge
-										var minX = Mathf.Min(e.left, sx);
-										var maxX = Mathf.Max(e.right, fx);
-										var minY = Mathf.Min(e.top, sy);
-										var maxY = Mathf.Max(e.bottom, fy);
+								var meshName = GlTF_Mesh.GetNameFromObject(m);
+								Entry e;
+								if (entries.ContainsKey(name)) {
+									e = entries[name];
 
-										var mw = maxX - minX;
-										var mh = maxY - minY;
+									//merge
+									var minX = Mathf.Min(e.left, sx);
+									var maxX = Mathf.Max(e.right, fx);
+									var minY = Mathf.Min(e.top, sy);
+									var maxY = Mathf.Max(e.bottom, fy);
 
-										mw = Mathf.NextPowerOfTwo(mw);
-										mh = Mathf.NextPowerOfTwo(mh);
+									var mw = maxX - minX;
+									var mh = maxY - minY;
 
-										e.left = minX;
-										e.right = maxX;
-										e.top = minY;
-										e.bottom = maxY;
-									} else {
-										e = new Entry();
-										e.left = sx;
-										e.right = fx;
-										e.top = sy;
-										e.bottom = fy;
-										e.texWidth = tex.width;
-										e.texHeight = tex.height;
-										entries[name] = e;
-									}	
+									mw = Mathf.NextPowerOfTwo(mw);
+									mh = Mathf.NextPowerOfTwo(mh);
 
-									List<int> subMeshId = null;
-									if (e.subMeshMap.ContainsKey(meshName)) {
-										subMeshId = e.subMeshMap[meshName];
-									} else {
-										subMeshId = new List<int>();
-										e.subMeshMap[meshName] = subMeshId;
-									}
+									e.left = minX;
+									e.right = maxX;
+									e.top = minY;
+									e.bottom = maxY;
+								} else {
+									e = new Entry();
+									e.left = sx;
+									e.right = fx;
+									e.top = sy;
+									e.bottom = fy;
+									e.texWidth = tex.width;
+									e.texHeight = tex.height;
+									entries[name] = e;
+								}	
 
-									if (!subMeshId.Contains(i)) {
-										subMeshId.Add(i);
-									}
+								List<int> subMeshId = null;
+								if (e.subMeshMap.ContainsKey(meshName)) {
+									subMeshId = e.subMeshMap[meshName];
+								} else {
+									subMeshId = new List<int>();
+									e.subMeshMap[meshName] = subMeshId;
 								}
+
+								if (!subMeshId.Contains(i)) {
+									subMeshId.Add(i);
+								}									
 							}
 						}
 					}
@@ -238,6 +237,23 @@ public class TextureUnpacker {
 	}
 
 	public static void Build() {
+		var skipList = new List<string>();
+		foreach (var i in entries) {
+			var e = i.Value;
+			var mw = e.right - e.left;
+			var mh = e.bottom - e.top;
+			var dx = (float)mw / (float)e.texWidth;
+			var dy = (float)mh / (float)e.texHeight;
+
+			if (dx >= 0.9 || dy >= 0.9) {
+				skipList.Add(i.Key);
+			}
+		}
+
+		foreach (var sl in skipList) {			
+			entries.Remove(sl);
+		}
+			
 		foreach (var i in entries) {
 			var e = i.Value;
 
