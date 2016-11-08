@@ -17,7 +17,7 @@ public class Preset {
 		
 	public Dictionary<string, Shader> shaderMap = new Dictionary<string, Shader>();
 	public Dictionary<string, GlTF_Technique.States> techniqueStates = new Dictionary<string, GlTF_Technique.States>();
-	public Dictionary<string, UnpackUV> unpackUV = new Dictionary<string, UnpackUV>();
+	public Dictionary<string, List<UnpackUV>> unpackUV = new Dictionary<string, List<UnpackUV>>();
 
 	const string DEFAULT_VERTEX_SHADER = "DefaultVS.glsl";
 	const string DEFAULT_FRAGMENT_SHADER = "DefaultFS.glsl";
@@ -42,12 +42,14 @@ public class Preset {
 		return DEFAULT_FRAGMENT_SHADER;
 	}
 
-	public UnpackUV GetDefaultUnpackUV()
+	public List<UnpackUV> GetDefaultUnpackUVList()
 	{
 		// default is uv0 to tex0
-		UnpackUV ret = new UnpackUV();
-		ret.index = 0;
-		ret.textureIndex.Add(0);
+		var ret = new List<UnpackUV>();
+		var uv = new UnpackUV();
+		uv.index = 0;
+		uv.textureIndex.Add(0);
+		ret.Add(uv);
 		return ret;
 	}
 
@@ -224,14 +226,19 @@ public class Preset {
 		var tus = obj["TextureUnpacker"];
 		foreach (var tu in tus.AsObject.Dict)
 		{
-			UnpackUV unpack = new UnpackUV();
-			var uv = tu.Value["uv"];
-			unpack.index = uv["index"].AsInt;
-			var arr = uv["textureIndex"].AsArray;
-			for (var i = 0; i < arr.Count; ++i) {
-				unpack.textureIndex.Add(arr[i].AsInt);
+			var uvList = tu.Value.AsArray;
+			var l = new List<UnpackUV>();
+			for (var i = 0; i < uvList.Count; ++i) {
+				UnpackUV unpack = new UnpackUV();
+				var uv = uvList[i];
+				unpack.index = uv["uvIndex"].AsInt;
+				var arr = uv["textureIndex"].AsArray;
+				for (var j = 0; j < arr.Count; ++j) {
+					unpack.textureIndex.Add(arr[j].AsInt);
+				}
+				l.Add(unpack);
 			}
-			unpackUV[tu.Key] = unpack;
+			unpackUV[tu.Key] = l;
 		}
 	}
 }
