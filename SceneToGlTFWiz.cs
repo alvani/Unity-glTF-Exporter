@@ -765,9 +765,20 @@ public class SceneToGlTFWiz : EditorWindow
 			{
 				node.meshNames.Add (GlTF_Mesh.GetNameFromObject(m));
 			}
-
-			foreach (Transform t in tr.transform)
-				node.childrenNames.Add (GlTF_Node.GetNameFromObject(t));
+				
+			foreach (Transform t in tr.transform) {			
+				var found = false;
+				foreach (var check in trs) {
+					if (t == check) {
+						found = true;
+						break;
+					}
+				}
+				if (found)
+				{
+					node.childrenNames.Add (GlTF_Node.GetNameFromObject(t));
+				}
+			}
 
 			GlTF_Writer.nodes.Add (node);
 
