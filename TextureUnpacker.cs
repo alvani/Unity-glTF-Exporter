@@ -106,7 +106,10 @@ public class TextureUnpacker {
 
 		if (m != null && r != null) {
 			
-			for (int i = 0; i < m.subMeshCount; ++i) {				
+			for (int i = 0; i < m.subMeshCount; ++i) {	
+				if (m.GetTopology(i) != MeshTopology.Triangles) {
+					continue;
+				}
 				var tris = m.GetTriangles(i);
 
 				var uvsArr = new Vector2[][]{m.uv, m.uv2, m.uv3, m.uv4};

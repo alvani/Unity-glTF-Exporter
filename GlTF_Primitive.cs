@@ -17,7 +17,9 @@ public class GlTF_Primitive : GlTF_Writer {
 	public void Populate (Mesh m)
 	{
 //		attributes.Populate (m);
-		indices.Populate (m.GetTriangles(index), true);
+		if (m.GetTopology(index) == MeshTopology.Triangles) {
+			indices.Populate (m.GetTriangles(index), true);
+		}
 	}
 
 	public override void Write ()
