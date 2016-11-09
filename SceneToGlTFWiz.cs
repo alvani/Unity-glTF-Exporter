@@ -555,14 +555,20 @@ public class SceneToGlTFWiz : EditorWindow
 									if (td == ShaderUtil.ShaderPropertyTexDim.TexDim2D)
 									{											
 										var t = mat.GetTexture(pName);
-										if (t != null) 
-										{
-											var val = new GlTF_Material.StringValue();
-											val.name = pName;
-											var texName = GlTF_Texture.GetNameFromObject(t);
+										var val = new GlTF_Material.StringValue();
+										val.name = pName;
+										string texName = null;
+										if (t != null) {
+											texName = GlTF_Texture.GetNameFromObject(t);
 											val.value = texName;
-											material.values.Add(val);
+										} else {
+											val.value = "";
+										}
 
+										material.values.Add(val);
+
+										if (t != null) 
+										{											
 											if (!GlTF_Writer.textures.ContainsKey (texName))
 											{
 												var texPath = ExportTexture(t, savedPath);
