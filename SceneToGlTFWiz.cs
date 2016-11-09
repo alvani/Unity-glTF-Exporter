@@ -879,7 +879,7 @@ public class SceneToGlTFWiz : EditorWindow
 		if (t != null)
 		{
 			var ext = Path.GetExtension(assetPath);
-			if (ext != ".png")
+			if (ext == ".dds")
 			{				
 				var ct = Type.GetType("Imaging.DDSReader.DDS");
 				if (ct != null) 
@@ -896,6 +896,7 @@ public class SceneToGlTFWiz : EditorWindow
 					} else {
 						curTex = srcTex;
 					}
+
 
 					var b = curTex.EncodeToPNG();
 					File.WriteAllBytes(dstPath, b);
@@ -944,8 +945,25 @@ public class SceneToGlTFWiz : EditorWindow
 
 					Texture2D curTex = TextureUnpacker.ProcessTexture(name, copyTex);
 
-					var b = curTex.EncodeToPNG();
-					File.WriteAllBytes(dstPath, b);
+					byte[] b = null;
+					if (ext == ".jpg") 
+					{
+						b = curTex.EncodeToJPG();
+					} 
+					else if (ext == ".png")
+					{
+						b = curTex.EncodeToPNG();
+					}
+
+					if (b != null) 
+					{
+						File.WriteAllBytes(dstPath, b);
+					}
+					else
+					{
+						Debug.LogError("Unsupported file format for: " + fn);
+					}
+
 					if (curTex != copyTex) {
 						Texture2D.DestroyImmediate(curTex);
 					}
