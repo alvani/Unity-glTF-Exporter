@@ -18,6 +18,17 @@ public class BoundsDouble {
 		inited = true;
 	}
 
+	public BoundsDouble(double[] min, double[] max) {
+		this.min[0] = min[0];
+		this.min[1] = min[1];
+		this.min[2] = min[2];
+
+		this.max[0] = max[0];
+		this.max[1] = max[1];
+		this.max[2] = max[2];
+		inited = true;
+	}
+
 	public BoundsDouble(Vector3 min, Vector3 max) {
 		this.min[0] = min.x;
 		this.min[1] = min.y;
