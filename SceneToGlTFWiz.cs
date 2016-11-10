@@ -639,15 +639,17 @@ public class SceneToGlTFWiz : EditorWindow
 			// next, build hierarchy of nodes
 			GlTF_Node node = new GlTF_Node();
 
-			var instance = Activator.CreateInstance(rotScript.GetClass());
-			var b3c = instance as RotationCallback;
+			RotationCallback rotCallback = null;;
+			if (rotScript != null)
+			{
+				var instance = Activator.CreateInstance(rotScript.GetClass());
+				rotCallback = instance as RotationCallback;
+			}
+				
 			Matrix4x4 rotMat = Matrix4x4.identity;
-			if (rotScript != null && root != null)
-			{				
-				if (b3c != null)
-				{							
-					rotMat = b3c.GetNodeRotationMatrix(root);
-				}
+			if (root != null && rotCallback != null)
+			{		
+				rotMat = rotCallback.GetNodeRotationMatrix(root);
 			}
 
 			if (tr == root)
@@ -713,9 +715,9 @@ public class SceneToGlTFWiz : EditorWindow
 			if (!tbb.Empty && root != null) 
 			{		
 				Matrix4x4 brot = Matrix4x4.identity;
-				if (b3c != null)
+				if (rotCallback != null)
 				{							
-					brot = b3c.GetBoundsRotationMatrix(root);
+					brot = rotCallback.GetBoundsRotationMatrix(root);
 				}
 
 				var pos = tr.position - root.position; // relative to parent
