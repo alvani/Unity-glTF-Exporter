@@ -180,6 +180,13 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 		}
 
+		RotationCallback rotCallback = null;;
+		if (rotScript != null)
+		{
+			var instance = Activator.CreateInstance(rotScript.GetClass());
+			rotCallback = instance as RotationCallback;
+		}
+
 		if (unpackTexture) {
 			// prepass, for texture unpacker
 			TextureUnpacker.Reset();
@@ -194,9 +201,7 @@ public class SceneToGlTFWiz : EditorWindow
 
 		// first, collect objects in the scene, add to lists
 		foreach (Transform tr in trs)
-		{
-			BoundsDouble tbb = new BoundsDouble();
-
+		{			
 			if (tr.GetComponent<Camera>() != null)
 			{
 				if (tr.GetComponent<Camera>().orthographic)
@@ -611,12 +616,94 @@ public class SceneToGlTFWiz : EditorWindow
 				GlTF_Writer.meshes.Add (mesh);
 				if (unpackTexture) {
 					TextureUnpacker.ProcessMesh(mesh);
-				}					
+				}										
 
-				Vector4 maxf = positionAccessor.maxFloat;
-				Vector4 minf = positionAccessor.minFloat;
+				// calculate bounding box transform
+				if (root != null) 
+				{		
+					Matrix4x4 brot = Matrix4x4.identity;
+					if (rotCallback != null)
+					{							
+						brot = rotCallback.GetBoundsRotationMatrix(root);
+					}
 
-				tbb.Encapsulate(new BoundsDouble(new Vector3(minf.x, minf.y, minf.z), new Vector3(maxf.x, maxf.y, maxf.z)));
+					var pos = tr.position - root.position; // relative to parent
+					var objMat = Matrix4x4.TRS(pos, tr.rotation, tr.lossyScale);
+
+					//read vertices
+					var ms = positionAccessor.bufferView.memoryStream;
+					var offset = (int)positionAccessor.byteOffset;
+					var len = positionAccessor.count;
+					var buffer = new byte[len * 12];
+					var mspos = ms.Position;
+					ms.Position = offset;
+					ms.Read(buffer, 0, buffer.Length);
+
+					minHeight = double.MaxValue;
+					maxHeight = double.MinValue;
+
+					double[] c = writer.RTCCenter;
+
+					double[] minPos = new double[3];
+					minPos[0] = double.MaxValue;
+					minPos[1] = double.MaxValue;
+					minPos[2] = double.MaxValue;
+
+					double[] maxPos = new double[3];
+					maxPos[0] = double.MinValue;
+					maxPos[1] = double.MinValue;
+					maxPos[2] = double.MinValue;
+
+					for (int j = 0; j < len; ++j) 
+					{
+						var x = System.BitConverter.ToSingle(buffer, j * 12);
+						var y = System.BitConverter.ToSingle(buffer, j * 12 + 4);
+						var z = System.BitConverter.ToSingle(buffer, j * 12 + 8);
+
+						// local rotation
+						var lx = objMat.m00 * x + objMat.m01 * y + objMat.m02 * z;
+						var ly = objMat.m10 * x + objMat.m11 * y + objMat.m12 * z;
+						var lz = objMat.m20 * x + objMat.m21 * y + objMat.m22 * z;
+
+						minHeight = Math.Min(minHeight, ly);
+						maxHeight = Math.Max(maxHeight, ly);
+
+						// to world
+						double wx = brot.m00 * lx + brot.m01 * ly + brot.m02 * lz;
+						double wy = brot.m10 * lx + brot.m11 * ly + brot.m12 * lz;
+						double wz = brot.m20 * lx + brot.m21 * ly + brot.m22 * lz;
+
+						// local translation to world
+						double tx = brot.m00 * pos.x + brot.m01 * pos.y + brot.m02 * pos.z;
+						double ty = brot.m10 * pos.x + brot.m11 * pos.y + brot.m12 * pos.z;
+						double tz = brot.m20 * pos.x + brot.m21 * pos.y + brot.m22 * pos.z;
+
+						wx += tx;
+						wy += ty;
+						wz += tz;
+
+						if (c != null)
+						{
+							wx += c[0];
+							wy += c[1];
+							wz += c[2];
+						}							
+
+						minPos[0] = Math.Min(minPos[0], wx);
+						minPos[1] = Math.Min(minPos[1], wy);
+						minPos[2] = Math.Min(minPos[2], wz);
+
+						maxPos[0] = Math.Max(maxPos[0], wx);
+						maxPos[1] = Math.Max(maxPos[1], wy);
+						maxPos[2] = Math.Max(maxPos[2], wz);
+					}												
+
+					ms.Position = mspos;
+
+					BoundsDouble tbb = new BoundsDouble();
+					tbb.Encapsulate(new BoundsDouble(minPos, maxPos));							
+					bb.Encapsulate(tbb);
+				}
 			}
 
 			Animation a = tr.GetComponent<Animation>();
@@ -638,13 +725,6 @@ public class SceneToGlTFWiz : EditorWindow
 
 			// next, build hierarchy of nodes
 			GlTF_Node node = new GlTF_Node();
-
-			RotationCallback rotCallback = null;;
-			if (rotScript != null)
-			{
-				var instance = Activator.CreateInstance(rotScript.GetClass());
-				rotCallback = instance as RotationCallback;
-			}
 				
 			Matrix4x4 rotMat = Matrix4x4.identity;
 			if (root != null && rotCallback != null)
@@ -710,36 +790,6 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 
 			GlTF_Writer.nodes.Add (node);
-
-			// calculate bounding box transform
-			if (!tbb.Empty && root != null) 
-			{		
-				Matrix4x4 brot = Matrix4x4.identity;
-				if (rotCallback != null)
-				{							
-					brot = rotCallback.GetBoundsRotationMatrix(root);
-				}
-
-				var pos = tr.position - root.position; // relative to parent
-				var objMat = Matrix4x4.TRS(pos, tr.rotation, tr.lossyScale);
-				var mbb = brot * objMat;
-
-				// calculate local height
-				var obb = new BoundsDouble(tbb);
-				obb.Rotate(objMat);
-				minHeight = obb.Min[1];
-				maxHeight = obb.Max[1];
-
-				tbb.Rotate(mbb);
-
-				if (writer.RTCCenter != null) 
-				{
-					var c = writer.RTCCenter;
-					tbb.Translate(c[0], c[1], c[2]);
-				}
-
-				bb.Encapsulate(tbb);
-			}
 		}				
 			
 		// third, add meshes etc to byte stream, keeping track of buffer offsets
