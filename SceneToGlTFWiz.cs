@@ -45,7 +45,7 @@ public class SceneToGlTFWiz : EditorWindow
 	public static MonoScript rtcScript;
 	public static MonoScript rotScript;
 	public static bool unpackTexture = false;
-	public static bool copyShaders = true;
+	public static bool copyShaders = false;
 
 	[MenuItem ("File/Export/glTF")]
 	static void CreateWizard()
