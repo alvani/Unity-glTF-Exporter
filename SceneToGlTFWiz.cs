@@ -45,6 +45,7 @@ public class SceneToGlTFWiz : EditorWindow
 	public static MonoScript rtcScript;
 	public static MonoScript rotScript;
 	public static bool unpackTexture = false;
+	public static bool copyShaders = true;
 
 	[MenuItem ("File/Export/glTF")]
 	static void CreateWizard()
@@ -106,6 +107,9 @@ public class SceneToGlTFWiz : EditorWindow
 		{
 			GlTF_Writer.b3dm = false;
 		}
+
+		copyShaders = GUILayout.Toggle(copyShaders, "Copy shaders");
+
 		presetAsset = EditorGUILayout.ObjectField("Preset file", presetAsset, typeof(UnityEngine.TextAsset), false) as UnityEngine.TextAsset;	
 		rtcScript = EditorGUILayout.ObjectField("Cesium RTC Callback", rtcScript, typeof(MonoScript), false) as MonoScript;
 		rotScript = EditorGUILayout.ObjectField("Rotation Callback", rotScript, typeof(MonoScript), false) as MonoScript;
@@ -791,6 +795,17 @@ public class SceneToGlTFWiz : EditorWindow
 
 			GlTF_Writer.nodes.Add (node);
 		}				
+
+		if (copyShaders && preset.shaderDir != null) {
+			var sd = Path.Combine(Application.dataPath, preset.shaderDir);
+			foreach (var shader in GlTF_Writer.shaders) {
+				var srcPath = Path.Combine(sd, shader.uri);
+				if (File.Exists(srcPath)) {
+					var dstPath = Path.Combine(savedPath, shader.uri);
+					File.Copy(srcPath, dstPath, true);
+				}
+			}
+		}
 			
 		// third, add meshes etc to byte stream, keeping track of buffer offsets
 		writer.Write ();

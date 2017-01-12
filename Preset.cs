@@ -15,6 +15,7 @@ public class Preset {
 		public List<int> textureIndex = new List<int>();
 	}
 		
+	public string shaderDir = null;
 	public Dictionary<string, Shader> shaderMap = new Dictionary<string, Shader>();
 	public Dictionary<string, GlTF_Technique.States> techniqueStates = new Dictionary<string, GlTF_Technique.States>();
 	public Dictionary<string, List<UnpackUV>> unpackUV = new Dictionary<string, List<UnpackUV>>();
@@ -57,6 +58,9 @@ public class Preset {
 	{
 		var text = File.ReadAllText(path);
 		var obj = JSON.Parse(text);
+
+		shaderDir = obj["ShaderDir"];
+
 		var sm = obj["ShaderMap"];
 
 		shaderMap.Clear();
