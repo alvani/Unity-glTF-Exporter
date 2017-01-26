@@ -334,7 +334,7 @@ public class SceneToGlTFWiz : EditorWindow
 
 					var mr = GetRenderer(tr);
 					var sm = mr.sharedMaterials;
-					if (i < sm.Length) {
+					if (i < sm.Length && sm[i] != null) {
 						var mat = sm[i];
 						var matName = GlTF_Material.GetNameFromObject(mat);
 						primitive.materialName = matName;
