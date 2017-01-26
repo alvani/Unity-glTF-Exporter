@@ -84,7 +84,7 @@ public class TextureUnpacker {
 		var ret = new List<Texture>();
 		var s = mat.shader;
 		if (s == null) {
-			return;
+			return ret;
 		}
 
 		int spCount = ShaderUtil.GetPropertyCount(s);
