@@ -112,6 +112,10 @@ public class TextureUnpacker {
 					continue;
 				}
 				var mat = r.sharedMaterials[i];
+				if (mat.shader == null) {
+					Debug.LogWarning("Failed getting shader name from material " + mat.name + " on mesh " + m.name);
+					continue;
+				}
 				List<Preset.UnpackUV> unpackUVList = null;
 				preset.unpackUV.TryGetValue(mat.shader.name, out unpackUVList);
 				if (unpackUVList == null) {
