@@ -54,11 +54,11 @@ public class TextureUnpacker {
 		var ret = new List<Texture>();
 
 		var mats = r.sharedMaterials;
-		foreach (var mat in mats) {
-			var s = mat.shader;
-			if (s == null) {
+		foreach (var mat in mats) {			
+			if (mat == null) {
 				continue;
 			}
+			var s = mat.shader;
 
 			int spCount = ShaderUtil.GetPropertyCount(s);
 			for (var i = 0; i < spCount; ++i) {
@@ -82,10 +82,11 @@ public class TextureUnpacker {
 
 	static List<Texture> GetTexturesFromMaterial(Material mat) {
 		var ret = new List<Texture>();
-		var s = mat.shader;
-		if (s == null) {
+		if (mat == null) {
 			return ret;
 		}
+
+		var s = mat.shader;
 
 		int spCount = ShaderUtil.GetPropertyCount(s);
 		for (var i = 0; i < spCount; ++i) {
@@ -118,8 +119,8 @@ public class TextureUnpacker {
 					continue;
 				}
 				var mat = r.sharedMaterials[i];
-				if (mat.shader == null) {
-					Debug.LogWarning("Failed getting shader name from material " + mat.name + " on mesh " + m.name);
+				if (mat == null) {
+					Debug.LogWarning("Failed getting shader name from material on mesh " + m.name);
 					continue;
 				}
 				List<Preset.UnpackUV> unpackUVList = null;
