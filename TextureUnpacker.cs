@@ -56,6 +56,9 @@ public class TextureUnpacker {
 		var mats = r.sharedMaterials;
 		foreach (var mat in mats) {
 			var s = mat.shader;
+			if (s == null) {
+				continue;
+			}
 
 			int spCount = ShaderUtil.GetPropertyCount(s);
 			for (var i = 0; i < spCount; ++i) {
@@ -80,6 +83,9 @@ public class TextureUnpacker {
 	static List<Texture> GetTexturesFromMaterial(Material mat) {
 		var ret = new List<Texture>();
 		var s = mat.shader;
+		if (s == null) {
+			return;
+		}
 
 		int spCount = ShaderUtil.GetPropertyCount(s);
 		for (var i = 0; i < spCount; ++i) {
