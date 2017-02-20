@@ -748,10 +748,10 @@ public class SceneToGlTFWiz : EditorWindow
 
 				// do not use global position if rtc is defined
 				Vector3 pos = Vector3.zero;
-				if (writer.RTCCenter == null) 
-				{
-					pos = tr.localPosition;
-				}
+//				if (writer.RTCCenter == null) 
+//				{
+//					pos = tr.localPosition;
+//				}
 
 				mat = mat * Matrix4x4.TRS(pos, tr.localRotation, tr.localScale);
 				node.matrix = new GlTF_Matrix(mat);
