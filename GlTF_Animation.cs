@@ -13,7 +13,7 @@ public class GlTF_Animation : GlTF_Writer {
 
 	class BoneAnimPath {
 		public enum Type {
-			Position,
+			Translation,
 			Scale,
 			Rotation
 		}
@@ -39,7 +39,7 @@ public class GlTF_Animation : GlTF_Writer {
 			channel = new GlTF_Channel(sampler, target);
 			accessor = new GlTF_Accessor("accessor_anim_" + subName, TypeToAccType(type), GlTF_Accessor.ComponentType.FLOAT);
 			switch (type) {
-				case Type.Position: 
+				case Type.Translation: 
 				case Type.Scale:
 					accessor.bufferView = GlTF_Writer.vec3BufferView; 
 					break;
@@ -52,7 +52,7 @@ public class GlTF_Animation : GlTF_Writer {
 
 		public void PopulateAccessor(AnimationClipCurveData cd, Keyframe[] refKeyFrames) {
 			string propName = cd.propertyName;
-			if (type == Type.Position || type == Type.Scale) {
+			if (type == Type.Translation || type == Type.Scale) {
 				if (v3 == null) {
 					v3 = new Vector3[refKeyFrames.Length];
 				}
@@ -112,7 +112,7 @@ public class GlTF_Animation : GlTF_Writer {
 
 		string TypeToString(Type type) {
 			switch (type) {
-				case Type.Position: return "position";
+				case Type.Translation: return "translation";
 				case Type.Scale: return "scale";
 				case Type.Rotation: return "rotation";
 			}
@@ -133,7 +133,7 @@ public class GlTF_Animation : GlTF_Writer {
 		public BoneAnimPath rotation;
 
 		public BoneAnimData(string animName, string objectName) {			
-			position = new BoneAnimPath(BoneAnimPath.Type.Position, animName, objectName);
+			position = new BoneAnimPath(BoneAnimPath.Type.Translation, animName, objectName);
 			scale = new BoneAnimPath(BoneAnimPath.Type.Scale, animName, objectName);
 			rotation = new BoneAnimPath(BoneAnimPath.Type.Rotation, animName, objectName);
 		}
