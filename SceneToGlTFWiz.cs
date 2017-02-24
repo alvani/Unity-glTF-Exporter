@@ -726,6 +726,13 @@ public class SceneToGlTFWiz : EditorWindow
 				}
 			}
 
+			var smr = tr.GetComponent<SkinnedMeshRenderer>();
+			if (smr != null) 
+			{
+				GlTF_Skin skin = new GlTF_Skin();
+				skin.Populate(smr);
+				GlTF_Writer.skins.Add(skin);
+			}
 
 			// next, build hierarchy of nodes
 			GlTF_Node node = new GlTF_Node();
