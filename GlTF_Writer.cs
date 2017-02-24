@@ -29,6 +29,7 @@ public class GlTF_Writer {
 	public static Dictionary<string, GlTF_Texture> textures = new Dictionary<string, GlTF_Texture>();
 	public static List<GlTF_Image> images = new List<GlTF_Image>();
 	public static List<GlTF_Animation> animations = new List<GlTF_Animation>();
+	public static List<GlTF_Skin> skins = new List<GlTF_Skin>();
 	public static Dictionary<string, GlTF_Technique> techniques = new Dictionary<string, GlTF_Technique>();
 	public static List<GlTF_Program> programs = new List<GlTF_Program>();
 	public static List<GlTF_Shader> shaders = new List<GlTF_Shader>();
@@ -509,6 +510,20 @@ public class GlTF_Writer {
 			{
 				CommaNL();
 				a.Write ();
+			}
+			jsonWriter.WriteLine();
+			IndentOut();
+			Indent();	jsonWriter.Write ("}");
+		}
+		if (skins.Count > 0) 
+		{
+			CommaNL();
+			Indent();	jsonWriter.Write ("\"skins\": {\n");
+			IndentIn();
+			foreach (GlTF_Skin s in skins)
+			{
+				CommaNL();
+				s.Write ();
 			}
 			jsonWriter.WriteLine();
 			IndentOut();
