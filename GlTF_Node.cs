@@ -18,6 +18,9 @@ public class GlTF_Node : GlTF_Writer {
 	public GlTF_Scale scale;
 	public GlTF_Translation translation;
 	public bool additionalProperties = false;
+	public string skinName;
+	public List<string> skeletonNames = new List<string>();
+	public string jointName;
 
 	public static string GetNameFromObject(Object o) 
 	{		 		
@@ -92,6 +95,26 @@ public class GlTF_Node : GlTF_Writer {
 		{
 			CommaNL();
 			rotation.Write ();
+		}
+		if (jointName != null) {
+			CommaNL();
+			Indent();	jsonWriter.Write("\"jointName\": \"" + jointName + "\"");
+		}
+		if (skinName != null) {
+			CommaNL();
+			Indent();	jsonWriter.Write("\"skin\": \"" + skinName + "\"");
+		}
+		if (skeletonNames.Count > 0) {
+			CommaNL();
+			Indent();		jsonWriter.Write("\"skeletons\": [\n");
+			IndentIn();
+			foreach (var n in skeletonNames) {
+				CommaNL();
+				Indent();	jsonWriter.Write("\"" + n + "\"");
+			}
+			IndentOut();
+			jsonWriter.WriteLine();
+			Indent();	jsonWriter.Write("]");
 		}
 		jsonWriter.WriteLine();
 		IndentOut();
