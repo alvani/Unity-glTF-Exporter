@@ -203,6 +203,7 @@ public class SceneToGlTFWiz : EditorWindow
 
 		BoundsDouble bb = new BoundsDouble();
 
+		GlTF_Skin skin = null;
 		// first, collect objects in the scene, add to lists
 		foreach (Transform tr in trs)
 		{			
@@ -726,17 +727,22 @@ public class SceneToGlTFWiz : EditorWindow
 				}
 			}
 
+			// next, build hierarchy of nodes
+			GlTF_Node node = new GlTF_Node();
+
 			var smr = tr.GetComponent<SkinnedMeshRenderer>();
 			if (smr != null) 
 			{
-				GlTF_Skin skin = new GlTF_Skin();
+				skin = new GlTF_Skin();
 				skin.Populate(smr);
 				GlTF_Writer.skins.Add(skin);
-			}
+				node.skinName = skin.name;
 
-			// next, build hierarchy of nodes
-			GlTF_Node node = new GlTF_Node();
-				
+				if (smr.rootBone != null) {
+					node.skeletonNames.Add(GlTF_Node.GetNameFromObject(smr.rootBone));
+				}
+			}
+										
 			Matrix4x4 rotMat = Matrix4x4.identity;
 			if (root != null && rotCallback != null)
 			{		
@@ -801,7 +807,18 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 
 			GlTF_Writer.nodes.Add (node);
-		}				
+		}
+
+		// set joint name property on skinned node
+		if (skin != null) {
+			foreach (var boneName in skin.boneNames) {
+				foreach (var node in GlTF_Writer.nodes) {
+					if (node.name == boneName) {
+						node.jointName = boneName;
+					}
+				}
+			}
+		}
 
 		if (copyShaders && preset.shaderDir != null) {
 			var sd = Path.Combine(Application.dataPath, preset.shaderDir);

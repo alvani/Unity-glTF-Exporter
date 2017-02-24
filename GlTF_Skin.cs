@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GlTF_Skin : GlTF_Writer {
-	List<string> boneNames;
+	public List<string> boneNames;
 	GlTF_Matrix bindShape;
 	GlTF_Accessor ibmAccessor;
 
