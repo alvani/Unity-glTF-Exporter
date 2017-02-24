@@ -54,7 +54,7 @@ public class GlTF_BufferView : GlTF_Writer  {
 			//			memoryStream.Write (vs[i]);
 			//			memoryStream.Write ((byte[])vs, 0, vs.Length * sizeof(int));
 			float f = vs[i];
-			memoryStream.Write (BitConverter.GetBytes(f), 0, 2);
+			memoryStream.Write (BitConverter.GetBytes(f), 0, 4);
 			currentOffset += 4;
 		}
 		byteLength = currentOffset;
