@@ -18,7 +18,7 @@ public class GlTF_Writer {
 	public static GlTF_BufferView vec2BufferView = new GlTF_BufferView("vec2BufferView");
 	public static GlTF_BufferView vec3BufferView = new GlTF_BufferView("vec3BufferView");
 	public static GlTF_BufferView vec4BufferView = new GlTF_BufferView("vec4BufferView");
-	public static GlTF_BufferView mat4BufferView = new GlTF_BufferView("mat4BufferView");
+	public static GlTF_BufferView mat4BufferView = new GlTF_BufferView("mat4BufferView", -1);
 	public static List<GlTF_BufferView> bufferViews = new List<GlTF_BufferView>();	
 	public static List<GlTF_Camera> cameras = new List<GlTF_Camera>();
 	public static List<GlTF_Light> lights = new List<GlTF_Light>();

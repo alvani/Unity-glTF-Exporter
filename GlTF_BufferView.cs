@@ -80,10 +80,17 @@ public class GlTF_BufferView : GlTF_Writer  {
 		Indent();		jsonWriter.Write ("\"" + name + "\": {\n");
 		IndentIn();
 		var binName = binary ? "binary_glTF" : Path.GetFileNameWithoutExtension(GlTF_Writer.binFileName);
-		Indent();		jsonWriter.Write ("\"buffer\": \"" + binName +"\",\n");
-		Indent();		jsonWriter.Write ("\"byteLength\": " + byteLength + ",\n");
-		Indent();		jsonWriter.Write ("\"byteOffset\": " + byteOffset + ",\n");
-		Indent();		jsonWriter.Write ("\"target\": " + target + "\n");
+		CommaNL();
+		Indent();		jsonWriter.Write ("\"buffer\": \"" + binName +"\"");
+		CommaNL();
+		Indent();		jsonWriter.Write ("\"byteLength\": " + byteLength);
+		CommaNL();
+		Indent();		jsonWriter.Write ("\"byteOffset\": " + byteOffset);
+		if (target != -1) {
+			CommaNL();
+			Indent();		jsonWriter.Write ("\"target\": " + target);
+		}
+		jsonWriter.WriteLine();
 		IndentOut();
 		Indent();		jsonWriter.Write ("}");
 	}
