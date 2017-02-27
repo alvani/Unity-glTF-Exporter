@@ -203,6 +203,7 @@ public class SceneToGlTFWiz : EditorWindow
 
 		BoundsDouble bb = new BoundsDouble();
 
+		GlTF_Skin skin = null;
 		// first, collect objects in the scene, add to lists
 		foreach (Transform tr in trs)
 		{			
@@ -313,6 +314,17 @@ public class SceneToGlTFWiz : EditorWindow
 					GlTF_Writer.accessors.Add (uv3Accessor);
 				}
 
+				GlTF_Accessor boneIndexAccessor = null;
+				GlTF_Accessor boneWeightAccessor = null;
+				if (m.boneWeights.Length > 0) {					
+					boneIndexAccessor =  new GlTF_Accessor(GlTF_Accessor.GetNameFromObject(m, "joint"), GlTF_Accessor.Type.VEC4, GlTF_Accessor.ComponentType.FLOAT);
+					boneIndexAccessor.bufferView = GlTF_Writer.vec4BufferView;
+					GlTF_Writer.accessors.Add (boneIndexAccessor);
+					boneWeightAccessor =  new GlTF_Accessor(GlTF_Accessor.GetNameFromObject(m, "weight"), GlTF_Accessor.Type.VEC4, GlTF_Accessor.ComponentType.FLOAT);
+					boneWeightAccessor.bufferView = GlTF_Writer.vec4BufferView;
+					GlTF_Writer.accessors.Add (boneWeightAccessor);
+				}
+
 				var smCount = m.subMeshCount;
 				for (var i = 0; i < smCount; ++i) 
 				{						
@@ -326,6 +338,8 @@ public class SceneToGlTFWiz : EditorWindow
 					attributes.texCoord1Accessor = uv1Accessor;
 					attributes.texCoord2Accessor = uv2Accessor;
 					attributes.texCoord3Accessor = uv3Accessor;
+					attributes.boneIndexAccessor = boneIndexAccessor;
+					attributes.boneWeightAccessor = boneWeightAccessor;
 					primitive.attributes = attributes;
 					GlTF_Accessor indexAccessor = new GlTF_Accessor(GlTF_Accessor.GetNameFromObject(m, "indices_" + i), GlTF_Accessor.Type.SCALAR, GlTF_Accessor.ComponentType.USHORT);
 					indexAccessor.bufferView = GlTF_Writer.ushortBufferView;
@@ -440,9 +454,50 @@ public class SceneToGlTFWiz : EditorWindow
 									tech.attributes.Add(tAttr);
 								}
 
+								if (boneIndexAccessor != null)
+								{
+									tParam = new GlTF_Technique.Parameter();
+									tParam.name = "joint";
+									tParam.type = GlTF_Technique.Type.FLOAT_VEC4;
+									tParam.semantic = GlTF_Technique.Semantic.JOINT;
+									tech.parameters.Add(tParam);
+									tAttr = new GlTF_Technique.Attribute();
+									tAttr.name = "a_joint";
+									tAttr.param = tParam.name;
+									tech.attributes.Add(tAttr);
+								}
+
+								if (boneWeightAccessor != null)
+								{
+									tParam = new GlTF_Technique.Parameter();
+									tParam.name = "weight";
+									tParam.type = GlTF_Technique.Type.FLOAT_VEC4;
+									tParam.semantic = GlTF_Technique.Semantic.WEIGHT;
+									tech.parameters.Add(tParam);
+									tAttr = new GlTF_Technique.Attribute();
+									tAttr.name = "a_weight";
+									tAttr.param = tParam.name;
+									tech.attributes.Add(tAttr);
+								}									
+
 								tech.AddDefaultUniforms(writer.RTCCenter != null);
 
 								GlTF_Writer.techniques.Add (techName, tech);
+
+								GlTF_Technique.Uniform tUni;
+								if (m.bindposes.Length > 0)
+								{
+									tParam = new GlTF_Technique.Parameter();
+									tParam.name = "jointMat";
+									tParam.type = GlTF_Technique.Type.FLOAT_MAT4;
+									tParam.semantic = GlTF_Technique.Semantic.JOINTMATRIX;
+									tParam.count = m.bindposes.Length;
+									tech.parameters.Add(tParam);
+									tUni = new GlTF_Technique.Uniform();
+									tUni.name = "u_jointMat";
+									tUni.param = tParam.name;
+									tech.uniforms.Add(tUni);
+								}
 
 								int spCount = ShaderUtil.GetPropertyCount(s);
 								for (var j = 0; j < spCount; ++j) 
@@ -451,7 +506,6 @@ public class SceneToGlTFWiz : EditorWindow
 									var pType = ShaderUtil.GetPropertyType(s, j);
 									//										Debug.Log(pName + " " +  pType);
 
-									GlTF_Technique.Uniform tUni;
 									if (pType == ShaderUtil.ShaderPropertyType.Color)
 									{
 										tParam = new GlTF_Technique.Parameter();
@@ -721,15 +775,27 @@ public class SceneToGlTFWiz : EditorWindow
 				for (int i = 0; i < nClips; i++)
 				{
 					GlTF_Animation anim = new GlTF_Animation(a.name);
-					anim.Populate (clips[i]);
+					anim.Populate (clips[i], tr);
 					GlTF_Writer.animations.Add (anim);
 				}
 			}
 
-
 			// next, build hierarchy of nodes
 			GlTF_Node node = new GlTF_Node();
-				
+
+			var smr = tr.GetComponent<SkinnedMeshRenderer>();
+			if (smr != null) 
+			{
+				skin = new GlTF_Skin();
+				skin.Populate(smr);
+				GlTF_Writer.skins.Add(skin);
+				node.skinName = skin.name;
+
+				if (smr.rootBone != null) {
+					node.skeletonNames.Add(GlTF_Node.GetNameFromObject(smr.rootBone));
+				}
+			}
+										
 			Matrix4x4 rotMat = Matrix4x4.identity;
 			if (root != null && rotCallback != null)
 			{		
@@ -748,10 +814,10 @@ public class SceneToGlTFWiz : EditorWindow
 
 				// do not use global position if rtc is defined
 				Vector3 pos = Vector3.zero;
-				if (writer.RTCCenter == null) 
-				{
-					pos = tr.localPosition;
-				}
+//				if (writer.RTCCenter == null) 
+//				{
+//					pos = tr.localPosition;
+//				}
 
 				mat = mat * Matrix4x4.TRS(pos, tr.localRotation, tr.localScale);
 				node.matrix = new GlTF_Matrix(mat);
@@ -794,7 +860,18 @@ public class SceneToGlTFWiz : EditorWindow
 			}
 
 			GlTF_Writer.nodes.Add (node);
-		}				
+		}
+
+		// set joint name property on skinned node
+		if (skin != null) {
+			foreach (var boneName in skin.boneNames) {
+				foreach (var node in GlTF_Writer.nodes) {
+					if (node.name == boneName) {
+						node.jointName = boneName;
+					}
+				}
+			}
+		}
 
 		if (copyShaders && preset.shaderDir != null) {
 			var sd = Path.Combine(Application.dataPath, preset.shaderDir);

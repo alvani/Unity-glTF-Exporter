@@ -5,17 +5,9 @@ public class GlTF_Channel : GlTF_Writer {
 	public GlTF_AnimSampler sampler;
 	public GlTF_Target target;
 
-	public GlTF_Channel (string ch, GlTF_AnimSampler s) {
+	public GlTF_Channel (GlTF_AnimSampler s, GlTF_Target t) {
 		sampler = s;
-		switch (ch)
-		{
-		case "translation":
-			break;
-		case "rotation":
-			break;
-		case "scale":
-			break;
-		}
+		target = t;
 	}
 
 	public override void Write()

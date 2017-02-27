@@ -54,7 +54,7 @@ public class GlTF_BufferView : GlTF_Writer  {
 			//			memoryStream.Write (vs[i]);
 			//			memoryStream.Write ((byte[])vs, 0, vs.Length * sizeof(int));
 			float f = vs[i];
-			memoryStream.Write (BitConverter.GetBytes(f), 0, 2);
+			memoryStream.Write (BitConverter.GetBytes(f), 0, 4);
 			currentOffset += 4;
 		}
 		byteLength = currentOffset;
@@ -80,10 +80,17 @@ public class GlTF_BufferView : GlTF_Writer  {
 		Indent();		jsonWriter.Write ("\"" + name + "\": {\n");
 		IndentIn();
 		var binName = binary ? "binary_glTF" : Path.GetFileNameWithoutExtension(GlTF_Writer.binFileName);
-		Indent();		jsonWriter.Write ("\"buffer\": \"" + binName +"\",\n");
-		Indent();		jsonWriter.Write ("\"byteLength\": " + byteLength + ",\n");
-		Indent();		jsonWriter.Write ("\"byteOffset\": " + byteOffset + ",\n");
-		Indent();		jsonWriter.Write ("\"target\": " + target + "\n");
+		CommaNL();
+		Indent();		jsonWriter.Write ("\"buffer\": \"" + binName +"\"");
+		CommaNL();
+		Indent();		jsonWriter.Write ("\"byteLength\": " + byteLength);
+		CommaNL();
+		Indent();		jsonWriter.Write ("\"byteOffset\": " + byteOffset);
+		if (target != -1) {
+			CommaNL();
+			Indent();		jsonWriter.Write ("\"target\": " + target);
+		}
+		jsonWriter.WriteLine();
 		IndentOut();
 		Indent();		jsonWriter.Write ("}");
 	}

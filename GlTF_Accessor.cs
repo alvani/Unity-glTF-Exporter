@@ -6,7 +6,8 @@ public class GlTF_Accessor : GlTF_Writer {
 		SCALAR,
 		VEC2,
 		VEC3,
-		VEC4
+		VEC4,
+		MAT4
 	}
 
 	public enum ComponentType {
@@ -43,6 +44,9 @@ public class GlTF_Accessor : GlTF_Writer {
 			break;
 		case Type.VEC4:
 			byteStride = 16;
+			break;
+		case Type.MAT4:
+			byteStride = 64;
 			break;
 		}
 		componentType = c;
@@ -195,6 +199,37 @@ public class GlTF_Accessor : GlTF_Writer {
 
 	}
 
+	public void Populate (Matrix4x4[] ms)
+	{
+		if (type != Type.MAT4)
+			throw (new System.Exception());		
+		byteOffset = bufferView.currentOffset;	
+		count = ms.Length;
+		if (count > 0)
+		{				
+			for (int i = 0; i < ms.Length; i++)
+			{
+				var m = ms[i];
+				bufferView.Populate (m.m00);
+				bufferView.Populate (m.m10);
+				bufferView.Populate (m.m20);
+				bufferView.Populate (m.m30);
+				bufferView.Populate (m.m01);
+				bufferView.Populate (m.m11);
+				bufferView.Populate (m.m21);
+				bufferView.Populate (m.m31);
+				bufferView.Populate (m.m02);
+				bufferView.Populate (m.m12);
+				bufferView.Populate (m.m22);
+				bufferView.Populate (m.m32);
+				bufferView.Populate (m.m03);
+				bufferView.Populate (m.m13);
+				bufferView.Populate (m.m23);
+				bufferView.Populate (m.m33);
+			}
+		}
+	}
+
 	void WriteMin()
 	{
 		if (componentType == ComponentType.FLOAT)
@@ -269,13 +304,15 @@ public class GlTF_Accessor : GlTF_Writer {
 		Indent();		jsonWriter.Write ("\"componentType\": " + (int)componentType + ",\n");
 		Indent();		jsonWriter.Write ("\"count\": " + count + ",\n");
 
-
-		Indent();		jsonWriter.Write ("\"max\": [ ");
-		WriteMax();
-		jsonWriter.Write (" ],\n");
-		Indent();		jsonWriter.Write ("\"min\": [ ");
-		WriteMin();
-		jsonWriter.Write (" ],\n");
+		if (type != Type.MAT4) 
+		{
+			Indent();		jsonWriter.Write ("\"max\": [ ");
+			WriteMax();
+			jsonWriter.Write (" ],\n");
+			Indent();		jsonWriter.Write ("\"min\": [ ");
+			WriteMin();
+			jsonWriter.Write (" ],\n");
+		}
 		
 		Indent();		jsonWriter.Write ("\"type\": \"" + type + "\"\n");
 		IndentOut();
