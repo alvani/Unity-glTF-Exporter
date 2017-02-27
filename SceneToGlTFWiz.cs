@@ -314,6 +314,17 @@ public class SceneToGlTFWiz : EditorWindow
 					GlTF_Writer.accessors.Add (uv3Accessor);
 				}
 
+				GlTF_Accessor boneIndexAccessor = null;
+				GlTF_Accessor boneWeightAccessor = null;
+				if (m.boneWeights.Length > 0) {					
+					boneIndexAccessor =  new GlTF_Accessor(GlTF_Accessor.GetNameFromObject(m, "joint"), GlTF_Accessor.Type.VEC4, GlTF_Accessor.ComponentType.FLOAT);
+					boneIndexAccessor.bufferView = GlTF_Writer.vec4BufferView;
+					GlTF_Writer.accessors.Add (boneIndexAccessor);
+					boneWeightAccessor =  new GlTF_Accessor(GlTF_Accessor.GetNameFromObject(m, "weight"), GlTF_Accessor.Type.VEC4, GlTF_Accessor.ComponentType.FLOAT);
+					boneWeightAccessor.bufferView = GlTF_Writer.vec4BufferView;
+					GlTF_Writer.accessors.Add (boneWeightAccessor);
+				}
+
 				var smCount = m.subMeshCount;
 				for (var i = 0; i < smCount; ++i) 
 				{						
@@ -327,6 +338,8 @@ public class SceneToGlTFWiz : EditorWindow
 					attributes.texCoord1Accessor = uv1Accessor;
 					attributes.texCoord2Accessor = uv2Accessor;
 					attributes.texCoord3Accessor = uv3Accessor;
+					attributes.boneIndexAccessor = boneIndexAccessor;
+					attributes.boneWeightAccessor = boneWeightAccessor;
 					primitive.attributes = attributes;
 					GlTF_Accessor indexAccessor = new GlTF_Accessor(GlTF_Accessor.GetNameFromObject(m, "indices_" + i), GlTF_Accessor.Type.SCALAR, GlTF_Accessor.ComponentType.USHORT);
 					indexAccessor.bufferView = GlTF_Writer.ushortBufferView;
