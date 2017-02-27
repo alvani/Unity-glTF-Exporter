@@ -26,24 +26,18 @@ public class GlTF_Skin : GlTF_Writer {
 				bindShape = new GlTF_Matrix(Matrix4x4.identity);
 			}
 			bindShape.name = "bindShapeMatrix";
-			ProcessBone(smr.rootBone, boneNames, boneMats, Matrix4x4.identity);
+
+			for (var i = 0; i < smr.bones.Length; ++i) {
+				boneNames.Add(GlTF_Node.GetNameFromObject(smr.bones[i]));
+				boneMats.Add(smr.sharedMesh.bindposes[i]);
+			}
 
 			ibmAccessor =  new GlTF_Accessor("accessor_ibm_" + name, GlTF_Accessor.Type.MAT4, GlTF_Accessor.ComponentType.FLOAT);
 			ibmAccessor.bufferView = GlTF_Writer.mat4BufferView;
 			ibmAccessor.Populate(boneMats.ToArray());
 			GlTF_Writer.accessors.Add(ibmAccessor);
 		}
-	}
-
-	void ProcessBone(Transform bone, List<string> boneNames, List<Matrix4x4> boneMats, Matrix4x4 parentMat) {
-		boneNames.Add(GlTF_Node.GetNameFromObject(bone));
-		var mat = parentMat * Matrix4x4.TRS(bone.localPosition, bone.localRotation, bone.localScale);
-		boneMats.Add(mat.inverse);
-		for (var i = 0; i < bone.childCount; ++i) {
-			var bc = bone.GetChild(i);
-			ProcessBone(bc, boneNames, boneMats, mat);
-		}
-	}
+	}		
 
 	public override void Write()
 	{
