@@ -454,9 +454,50 @@ public class SceneToGlTFWiz : EditorWindow
 									tech.attributes.Add(tAttr);
 								}
 
+								if (boneIndexAccessor != null)
+								{
+									tParam = new GlTF_Technique.Parameter();
+									tParam.name = "joint";
+									tParam.type = GlTF_Technique.Type.FLOAT_VEC4;
+									tParam.semantic = GlTF_Technique.Semantic.JOINT;
+									tech.parameters.Add(tParam);
+									tAttr = new GlTF_Technique.Attribute();
+									tAttr.name = "a_joint";
+									tAttr.param = tParam.name;
+									tech.attributes.Add(tAttr);
+								}
+
+								if (boneWeightAccessor != null)
+								{
+									tParam = new GlTF_Technique.Parameter();
+									tParam.name = "weight";
+									tParam.type = GlTF_Technique.Type.FLOAT_VEC4;
+									tParam.semantic = GlTF_Technique.Semantic.WEIGHT;
+									tech.parameters.Add(tParam);
+									tAttr = new GlTF_Technique.Attribute();
+									tAttr.name = "a_weight";
+									tAttr.param = tParam.name;
+									tech.attributes.Add(tAttr);
+								}									
+
 								tech.AddDefaultUniforms(writer.RTCCenter != null);
 
 								GlTF_Writer.techniques.Add (techName, tech);
+
+								GlTF_Technique.Uniform tUni;
+								if (m.bindposes.Length > 0)
+								{
+									tParam = new GlTF_Technique.Parameter();
+									tParam.name = "jointMat";
+									tParam.type = GlTF_Technique.Type.FLOAT_MAT4;
+									tParam.semantic = GlTF_Technique.Semantic.JOINTMATRIX;
+									tParam.count = m.bindposes.Length;
+									tech.parameters.Add(tParam);
+									tUni = new GlTF_Technique.Uniform();
+									tUni.name = "u_jointMat";
+									tUni.param = tParam.name;
+									tech.uniforms.Add(tUni);
+								}
 
 								int spCount = ShaderUtil.GetPropertyCount(s);
 								for (var j = 0; j < spCount; ++j) 
@@ -465,7 +506,6 @@ public class SceneToGlTFWiz : EditorWindow
 									var pType = ShaderUtil.GetPropertyType(s, j);
 									//										Debug.Log(pName + " " +  pType);
 
-									GlTF_Technique.Uniform tUni;
 									if (pType == ShaderUtil.ShaderPropertyType.Color)
 									{
 										tParam = new GlTF_Technique.Parameter();

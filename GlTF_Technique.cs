@@ -24,13 +24,17 @@ public class GlTF_Technique : GlTF_Writer {
 		MODELVIEW,
 		PROJECTION,
 		MODELVIEWINVERSETRANSPOSE,
-		CESIUM_RTC_MODELVIEW
+		CESIUM_RTC_MODELVIEW,
+		JOINT,
+		WEIGHT,
+		JOINTMATRIX
 	}
 
 	public class Parameter {	
 		public string name;	
 		public Type type;
 		public Semantic semantic = Semantic.UNKNOWN;
+		public int count = -1; // for joint matrix
 	}
 
 	public class Attribute {
@@ -229,14 +233,21 @@ public class GlTF_Technique : GlTF_Writer {
 			CommaNL();
 			Indent();	jsonWriter.Write ("\"" + p.name + "\": {\n");
 			IndentIn();
+
+			CommaNL();
 			Indent();	jsonWriter.Write ("\"type\": " + (int)p.type);
 			if (p.semantic != Semantic.UNKNOWN)
 			{
-				jsonWriter.Write (",\n");
-				Indent();	jsonWriter.Write ("\"semantic\": \"" + p.semantic + "\"\n");
-			} else {
-				jsonWriter.Write ("\n");
+				CommaNL();
+				Indent();	jsonWriter.Write ("\"semantic\": \"" + p.semantic + "\"");
 			}
+			if (p.count != -1)
+			{
+				CommaNL();
+				Indent();	jsonWriter.Write("\"count\": " + p.count);
+			}
+			jsonWriter.WriteLine();
+
 			IndentOut();
 			Indent();	jsonWriter.Write ("}");
 		}
