@@ -12,7 +12,7 @@ public class GlTF_Skin : GlTF_Writer {
 		return "skin_" + GlTF_Writer.GetNameFromObject(o, true);
 	}
 
-	public void Populate(SkinnedMeshRenderer smr) {			
+	public void Populate(SkinnedMeshRenderer smr, List<Transform> skeletons) {			
 		name = GetNameFromObject(smr.transform);
 		if (smr.rootBone != null) {
 			boneNames = new List<string>();
@@ -27,7 +27,13 @@ public class GlTF_Skin : GlTF_Writer {
 			}
 			bindShape.name = "bindShapeMatrix";
 
+			skeletons.Add(smr.rootBone);
 			for (var i = 0; i < smr.bones.Length; ++i) {
+				var found = IsBoneInHierarchy(smr.rootBone, smr.bones[i]);
+				if (!found) {
+					// set as its own skeleton to prevent error if it doesn't get included in rootBone hierarchy
+					skeletons.Add(smr.bones[i]);
+				}
 				boneNames.Add(GlTF_Node.GetNameFromObject(smr.bones[i]));
 				boneMats.Add(smr.sharedMesh.bindposes[i]);
 			}
@@ -37,7 +43,19 @@ public class GlTF_Skin : GlTF_Writer {
 			ibmAccessor.Populate(boneMats.ToArray());
 			GlTF_Writer.accessors.Add(ibmAccessor);
 		}
-	}		
+	}
+
+	public bool IsBoneInHierarchy(Transform parent, Transform bone) {
+		if (parent == bone) {
+			return true;
+		}
+		for (var i = 0; i < parent.childCount; ++i) {
+			if (IsBoneInHierarchy(parent.GetChild(i), bone)) {
+				return true;
+			};
+		}
+		return false;
+	}
 
 	public override void Write()
 	{

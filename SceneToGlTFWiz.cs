@@ -786,13 +786,14 @@ public class SceneToGlTFWiz : EditorWindow
 			var smr = tr.GetComponent<SkinnedMeshRenderer>();
 			if (smr != null) 
 			{
+				List<Transform> skeletons = new List<Transform>();
 				skin = new GlTF_Skin();
-				skin.Populate(smr);
+				skin.Populate(smr, skeletons);
 				GlTF_Writer.skins.Add(skin);
 				node.skinName = skin.name;
 
-				if (smr.rootBone != null) {
-					node.skeletonNames.Add(GlTF_Node.GetNameFromObject(smr.rootBone));
+				foreach (var st in skeletons) {
+					node.skeletonNames.Add(GlTF_Node.GetNameFromObject(st));
 				}
 			}
 										
