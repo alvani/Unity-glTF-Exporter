@@ -159,6 +159,7 @@ public class GlTF_Writer {
 
 		// write memory streams to binary file
 		ushortBufferView.byteOffset = 0;
+		ushortBufferView.Align(4);
 		floatBufferView.byteOffset = ushortBufferView.byteLength;
 		vec2BufferView.byteOffset = floatBufferView.byteOffset + floatBufferView.byteLength;
 		vec3BufferView.byteOffset = vec2BufferView.byteOffset + vec2BufferView.byteLength;

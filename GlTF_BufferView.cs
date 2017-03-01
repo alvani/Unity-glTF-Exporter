@@ -16,6 +16,13 @@ public class GlTF_BufferView : GlTF_Writer  {
 	public GlTF_BufferView (string n) { name = n; }
 	public GlTF_BufferView (string n, int t) { name = n; target = t; }
 
+	public void Align(int len) {
+		var rem = (int)(byteLength % len);
+		memoryStream.Write(new byte[rem], 0, rem);
+		currentOffset += rem;
+		byteLength = currentOffset;
+	}
+
 	public void Populate (int[] vs, bool flippedTriangle)
 	{
 		if (flippedTriangle)
