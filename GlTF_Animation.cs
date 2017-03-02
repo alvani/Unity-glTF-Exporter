@@ -239,12 +239,21 @@ public class GlTF_Animation : GlTF_Writer {
 		Indent();		jsonWriter.Write ("\"channels\": [\n");
 		foreach (BoneAnimData bad in boneAnimData.Values)
 		{
-			CommaNL();
-			bad.position.channel.Write();
-			CommaNL();
-			bad.rotation.channel.Write();
-			CommaNL();
-			bad.scale.channel.Write();
+			if (bad.position.accessor.count > 0)
+			{
+				CommaNL();
+				bad.position.channel.Write();
+			}
+			if (bad.rotation.accessor.count > 0)
+			{
+				CommaNL();
+				bad.rotation.channel.Write();
+			}
+			if (bad.scale.accessor.count > 0)
+			{
+				CommaNL();
+				bad.scale.channel.Write();
+			}
 		}
 		jsonWriter.WriteLine();
 		Indent();		jsonWriter.Write ("]");
@@ -257,12 +266,21 @@ public class GlTF_Animation : GlTF_Writer {
 		Indent();	jsonWriter.Write ("\"TIME\": \"" + timeAccessor.name + "\"");
 		foreach (BoneAnimData bad in boneAnimData.Values)
 		{
-			CommaNL();
-			Indent();	jsonWriter.Write ("\"" + bad.position.sampler.output + "\": \"" + bad.position.accessor.name + "\"");
-			CommaNL();
-			Indent();	jsonWriter.Write ("\"" + bad.rotation.sampler.output + "\": \"" + bad.rotation.accessor.name + "\"");
-			CommaNL();
-			Indent();	jsonWriter.Write ("\"" + bad.scale.sampler.output + "\": \"" + bad.scale.accessor.name + "\"");
+			if (bad.position.accessor.count > 0)
+			{
+				CommaNL();
+				Indent();	jsonWriter.Write ("\"" + bad.position.sampler.output + "\": \"" + bad.position.accessor.name + "\"");
+			}
+			if (bad.rotation.accessor.count > 0)
+			{
+				CommaNL();
+				Indent();	jsonWriter.Write ("\"" + bad.rotation.sampler.output + "\": \"" + bad.rotation.accessor.name + "\"");
+			}
+			if (bad.scale.accessor.count > 0)
+			{
+				CommaNL();
+				Indent();	jsonWriter.Write ("\"" + bad.scale.sampler.output + "\": \"" + bad.scale.accessor.name + "\"");
+			}
 		}
 		jsonWriter.WriteLine();
 
@@ -277,12 +295,21 @@ public class GlTF_Animation : GlTF_Writer {
 		IndentIn();
 		foreach (BoneAnimData bad in boneAnimData.Values)
 		{
-			CommaNL();
-			bad.position.sampler.Write();
-			CommaNL();
-			bad.rotation.sampler.Write();
-			CommaNL();
-			bad.scale.sampler.Write();
+			if (bad.position.accessor.count > 0)
+			{
+				CommaNL();
+				bad.position.sampler.Write();
+			}
+			if (bad.rotation.accessor.count > 0)
+			{
+				CommaNL();
+				bad.rotation.sampler.Write();
+			}
+			if (bad.scale.accessor.count > 0)
+			{
+				CommaNL();
+				bad.scale.sampler.Write();
+			}
 		}
 		IndentOut();
 		jsonWriter.WriteLine();

@@ -234,8 +234,11 @@ public class GlTF_Writer {
 			IndentIn();
 			foreach (GlTF_Accessor a in accessors)
 			{
-				CommaNL();
-				a.Write ();
+				if (a.count > 0)
+				{
+					CommaNL();
+					a.Write ();
+				}
 			}			
 			jsonWriter.WriteLine();
 			IndentOut();
