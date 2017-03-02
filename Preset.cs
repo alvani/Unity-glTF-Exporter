@@ -21,16 +21,17 @@ public class Preset {
 	public Dictionary<string, List<UnpackUV>> unpackUV = new Dictionary<string, List<UnpackUV>>();
 
 	const string DEFAULT_VERTEX_SHADER = "DefaultVS.glsl";
+	const string DEFAULT_ANIM_VERTEX_SHADER = "DefaultAnimVS.glsl";
 	const string DEFAULT_FRAGMENT_SHADER = "DefaultFS.glsl";
 
-	public string GetVertexShader(string shaderName)
+	public string GetVertexShader(string shaderName, bool anim)
 	{
 		if (shaderMap.ContainsKey(shaderName))
 		{
 			var s = shaderMap[shaderName];
 			return s.vertexShader;
 		} 
-		return DEFAULT_VERTEX_SHADER;
+		return anim ? DEFAULT_ANIM_VERTEX_SHADER : DEFAULT_VERTEX_SHADER;
 	}
 
 	public string GetFragmentShader(string shaderName)

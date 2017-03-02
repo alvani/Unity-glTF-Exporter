@@ -362,6 +362,7 @@ public class SceneToGlTFWiz : EditorWindow
 							var s = mat.shader;
 							var techName = GlTF_Technique.GetNameFromObject(s);
 							material.instanceTechniqueName = techName;
+							bool anim = boneIndexAccessor != null && boneWeightAccessor != null && m.bindposes.Length > 0;
 							if (!GlTF_Writer.techniques.ContainsKey(techName)) 
 							{
 								GlTF_Technique tech = new GlTF_Technique();
@@ -573,7 +574,7 @@ public class SceneToGlTFWiz : EditorWindow
 								vs.name = GlTF_Shader.GetNameFromObject(s, GlTF_Shader.Type.Vertex);
 								program.vertexShader = vs.name;
 								vs.type = GlTF_Shader.Type.Vertex;
-								vs.uri = preset.GetVertexShader(s.name);
+								vs.uri = preset.GetVertexShader(s.name, anim);
 								GlTF_Writer.shaders.Add(vs);
 
 								GlTF_Shader fs = new GlTF_Shader();
@@ -582,6 +583,91 @@ public class SceneToGlTFWiz : EditorWindow
 								fs.type = GlTF_Shader.Type.Fragment;
 								fs.uri = preset.GetFragmentShader(s.name);
 								GlTF_Writer.shaders.Add(fs);
+							} 
+							else 
+							{								
+								if (anim)
+								{
+									// check if previous technique creation contains anim
+									var tech = GlTF_Writer.techniques[techName];
+									bool jointFound = false;
+									bool weightFound = false;
+									bool jointMatFound = false;
+									foreach (var param in tech.parameters)
+									{										
+										if (param.name == "joint")
+										{
+											jointFound = true;
+										}
+										else if (param.name == "weight")
+										{
+											weightFound = true;
+										}
+										else if (param.name == "jointMat")
+										{
+											jointMatFound = true;
+										}
+									}
+
+									var prog = GlTF_Writer.programs.Find(p => p.name == tech.program);
+									Action<GlTF_Technique.Attribute> injectAttr = (tAttr) => {
+										if (prog != null && prog.attributes.Find(attr => attr == tAttr.name) == null)
+										{											
+											prog.attributes.Add(tAttr.name);
+										}
+									};										
+
+									if (!jointFound)
+									{
+										var tParam = new GlTF_Technique.Parameter();
+										tParam.name = "joint";
+										tParam.type = GlTF_Technique.Type.FLOAT_VEC4;
+										tParam.semantic = GlTF_Technique.Semantic.JOINT;
+										tech.parameters.Add(tParam);
+										var tAttr = new GlTF_Technique.Attribute();
+										tAttr.name = "a_joint";
+										tAttr.param = tParam.name;
+										tech.attributes.Add(tAttr);
+
+										injectAttr(tAttr);
+									}
+
+									if (!weightFound)
+									{
+										var tParam = new GlTF_Technique.Parameter();
+										tParam.name = "weight";
+										tParam.type = GlTF_Technique.Type.FLOAT_VEC4;
+										tParam.semantic = GlTF_Technique.Semantic.WEIGHT;
+										tech.parameters.Add(tParam);
+										var tAttr = new GlTF_Technique.Attribute();
+										tAttr.name = "a_weight";
+										tAttr.param = tParam.name;
+										tech.attributes.Add(tAttr);
+
+										injectAttr(tAttr);
+									}
+
+									if (!jointMatFound)
+									{
+										var tParam = new GlTF_Technique.Parameter();
+										tParam.name = "jointMat";
+										tParam.type = GlTF_Technique.Type.FLOAT_MAT4;
+										tParam.semantic = GlTF_Technique.Semantic.JOINTMATRIX;
+										tParam.count = m.bindposes.Length;
+										tech.parameters.Add(tParam);
+										var tUni = new GlTF_Technique.Uniform();
+										tUni.name = "u_jointMat";
+										tUni.param = tParam.name;
+										tech.uniforms.Add(tUni);
+									}
+
+									//check shader type
+									var vs = GlTF_Writer.shaders.Find(sh => sh.name == prog.vertexShader);
+									if (vs != null)
+									{										
+										vs.uri = preset.GetVertexShader(s.name, anim);
+									}
+								}
 							}
 
 							int spCount2 = ShaderUtil.GetPropertyCount(s);
