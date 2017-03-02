@@ -203,7 +203,7 @@ public class SceneToGlTFWiz : EditorWindow
 
 		BoundsDouble bb = new BoundsDouble();
 
-		GlTF_Skin skin = null;
+		List<GlTF_Skin> skins = new List<GlTF_Skin>();
 		// first, collect objects in the scene, add to lists
 		foreach (Transform tr in trs)
 		{			
@@ -873,10 +873,11 @@ public class SceneToGlTFWiz : EditorWindow
 			if (smr != null) 
 			{
 				List<Transform> skeletons = new List<Transform>();
-				skin = new GlTF_Skin();
+				var skin = new GlTF_Skin();
 				skin.Populate(smr, skeletons);
 				GlTF_Writer.skins.Add(skin);
 				node.skinName = skin.name;
+				skins.Add(skin);
 
 				foreach (var st in skeletons) {
 					node.skeletonNames.Add(GlTF_Node.GetNameFromObject(st));
@@ -950,11 +951,13 @@ public class SceneToGlTFWiz : EditorWindow
 		}
 
 		// set joint name property on skinned node
-		if (skin != null) {
-			foreach (var boneName in skin.boneNames) {
-				foreach (var node in GlTF_Writer.nodes) {
-					if (node.name == boneName) {
-						node.jointName = boneName;
+		if (skins.Count > 0) {
+			foreach (var skin in skins) {
+				foreach (var boneName in skin.boneNames) {
+					foreach (var node in GlTF_Writer.nodes) {
+						if (node.name == boneName) {
+							node.jointName = boneName;
+						}
 					}
 				}
 			}
