@@ -860,7 +860,7 @@ public class SceneToGlTFWiz : EditorWindow
 				//					int nClips = a.GetClipCount();
 				for (int i = 0; i < nClips; i++)
 				{
-					GlTF_Animation anim = new GlTF_Animation(a.name);
+					GlTF_Animation anim = new GlTF_Animation();
 					anim.Populate (clips[i], tr);
 					GlTF_Writer.animations.Add (anim);
 				}

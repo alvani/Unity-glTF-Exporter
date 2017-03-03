@@ -5,7 +5,6 @@ using UnityEditor;
 
 public class GlTF_Animation : GlTF_Writer {
 	public List<GlTF_Channel> channels = new List<GlTF_Channel>();
-	public GlTF_Parameters parameters;
 	public List<GlTF_AnimSampler> animSamplers = new List<GlTF_AnimSampler>();
 	bool gotTranslation = false;
 	bool gotRotation = false;
@@ -154,13 +153,12 @@ public class GlTF_Animation : GlTF_Writer {
 	Dictionary<string, BoneAnimData> boneAnimData = new Dictionary<string, BoneAnimData>();
 	GlTF_Accessor timeAccessor;
 
-	public GlTF_Animation (string n) {
-		name = n;
-		parameters = new GlTF_Parameters(n);
+	public GlTF_Animation () {		
 	}
 
 	public void Populate (AnimationClip c, Transform tr)
 	{
+		name = "anim_" + c.name + "_" + GlTF_Writer.GetNameFromObject(tr, true);
 		//	AnimationUtility.GetCurveBindings(c);
 		// look at each curve
 		// if position, rotation, scale detected for first time
