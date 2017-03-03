@@ -72,6 +72,7 @@ public class GlTF_Writer {
 		textures = new Dictionary<string, GlTF_Texture>();
 		images = new List<GlTF_Image>();
 		animations = new List<GlTF_Animation>();
+		skins = new List<GlTF_Skin>();
 		techniques = new Dictionary<string, GlTF_Technique>();
 		programs = new List<GlTF_Program>();
 		shaders = new List<GlTF_Shader>();
