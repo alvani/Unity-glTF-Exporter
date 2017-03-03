@@ -913,12 +913,16 @@ public class SceneToGlTFWiz : EditorWindow
 			else
 			{
 				node.hasParent = true;
-				if (tr.localPosition != Vector3.zero)
-					node.translation = new GlTF_Translation (tr.localPosition);
-				if (tr.localScale != Vector3.one)
-					node.scale = new GlTF_Scale (tr.localScale);
-				if (tr.localRotation != Quaternion.identity)
-					node.rotation = new GlTF_Rotation (tr.localRotation);
+				// do not set if has animation, will be modified by skin transforms
+				if (smr == null)
+				{
+					if (tr.localPosition != Vector3.zero)
+						node.translation = new GlTF_Translation (tr.localPosition);
+					if (tr.localScale != Vector3.one)
+						node.scale = new GlTF_Scale (tr.localScale);
+					if (tr.localRotation != Quaternion.identity)
+						node.rotation = new GlTF_Rotation (tr.localRotation);
+				}
 			}
 
 			node.name = GlTF_Node.GetNameFromObject(tr);
