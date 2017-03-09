@@ -67,7 +67,7 @@ public class TextureUnpacker {
 
 				if (pType == ShaderUtil.ShaderPropertyType.TexEnv) {
 					var td = ShaderUtil.GetTexDim(s, i);
-					if (td == ShaderUtil.ShaderPropertyTexDim.TexDim2D) {
+					if (td == UnityEngine.Rendering.TextureDimension.Tex2D) {
 						var t = mat.GetTexture(pName);
 						if (t != null) {
 							ret.Add(t);
@@ -95,7 +95,7 @@ public class TextureUnpacker {
 
 			if (pType == ShaderUtil.ShaderPropertyType.TexEnv) {
 				var td = ShaderUtil.GetTexDim(s, i);
-				if (td == ShaderUtil.ShaderPropertyTexDim.TexDim2D) {
+				if (td == UnityEngine.Rendering.TextureDimension.Tex2D) {
 					var t = mat.GetTexture(pName);
 					if (t != null) {
 						ret.Add(t);

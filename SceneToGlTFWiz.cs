@@ -27,8 +27,8 @@ public class SceneToGlTFWiz : EditorWindow
 
     static public string path = "?";
 	static XmlDocument xdoc;
-	static string savedPath = EditorPrefs.GetString (KEY_PATH, "/");
-	static string savedFile = EditorPrefs.GetString (KEY_FILE, "test.gltf");
+	static string savedPath;
+	static string savedFile;
 
 	static Preset preset = new Preset();
 	public static UnityEngine.TextAsset presetAsset;
@@ -57,6 +57,12 @@ public class SceneToGlTFWiz : EditorWindow
 
 		SceneToGlTFWiz window = (SceneToGlTFWiz)EditorWindow.GetWindow (typeof (SceneToGlTFWiz));
 		window.Show();
+	}
+
+	void OnEnable()
+	{
+		savedPath = EditorPrefs.GetString (KEY_PATH, "/");
+		savedFile = EditorPrefs.GetString (KEY_FILE, "test.gltf");
 	}
 
 	void OnWizardUpdate ()
@@ -544,7 +550,7 @@ public class SceneToGlTFWiz : EditorWindow
 									else if (pType == ShaderUtil.ShaderPropertyType.TexEnv)
 									{
 										var td = ShaderUtil.GetTexDim(s, j);
-										if (td == ShaderUtil.ShaderPropertyTexDim.TexDim2D)
+										if (td == UnityEngine.Rendering.TextureDimension.Tex2D)
 										{
 											tParam = new GlTF_Technique.Parameter();
 											tParam.name = pName;
@@ -701,7 +707,7 @@ public class SceneToGlTFWiz : EditorWindow
 								else if (pType == ShaderUtil.ShaderPropertyType.TexEnv)
 								{
 									var td = ShaderUtil.GetTexDim(s, j);
-									if (td == ShaderUtil.ShaderPropertyTexDim.TexDim2D)
+									if (td == UnityEngine.Rendering.TextureDimension.Tex2D)
 									{											
 										var t = mat.GetTexture(pName);
 										var val = new GlTF_Material.StringValue();
